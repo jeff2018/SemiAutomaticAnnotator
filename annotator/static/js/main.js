@@ -1,21 +1,23 @@
 var text_layer
+var shownPage
+
+
 $('#switch_modus').change(function (d) {
     //console.log($("#page").val())
     if (!this.checked) {
         documentMode = true
         pageMode = false
-        d3.selectAll('circle')
+        d3.selectAll('.node')
             .style('opacity', 1.00)
     } else {
-        var shownPage = $("#page").val()
+        shownPage = $("#page").val()
         pageMode = true
         documentMode = false
-        d3.selectAll('circle')
+        d3.selectAll('.node')
             .filter(function (d) {
-                console.log(d.pages.includes(shownPage))
+                
                 return !d.pages.includes("Page " + shownPage)
             })
-
             .style('opacity', 0.25);
     }
 

@@ -21,17 +21,6 @@ console.log(centerX, centerY)
 
 var color = d3.scaleSequential(d3.interpolateRainbow);
 var colorPage = d3.scaleOrdinal(d3.schemeCategory10);
-/*$(function(){
-    $("#btn_bubblegraph").on('click',function(){
-        console.log("bubblegraph")
-        console.log($(this).hasClass('active') )
-        drawBubbleGraph(data)
-        var sunburst = d3.select(".sunburst")
-        if (sunburst) {
-            sunburst.remove()
-        }
-    });
-})*/
 
 function drawBubbleGraph(data) {
 
@@ -39,10 +28,13 @@ function drawBubbleGraph(data) {
     var pageWheel;
     var infoBox;
 
-    var scaleRadius = d3.scaleLinear().domain([0, pageArray.length]).range([45, 95]);
+    var scaleRadius = d3.scaleLinear().domain([0, pageArray.length]).range([40, 75]);
     var maxRadiusFocusNode = centerY * 0.75;
 
-
+    //sort the data according to the averagedegree for the ranking
+    data.nodes.sort(function(a,b){
+    return b.avgDegree - a.avgDegree
+    })
 
 
     let pack = d3.pack()
@@ -73,29 +65,61 @@ function drawBubbleGraph(data) {
             return d.value
         });
 
-    let nodes = pack(root).leaves().map(node => {
+    let nodesData = pack(root).leaves().map(nodes => {
 
         //console.log('node:', node.x, (node.x - centerX) * 2);
-        const data = node.data;
+        const data = nodes.data;
     return {
-        x: centerX + (node.x - centerX) * 3,
-        y: centerY + (node.y - centerY) * 3,
+        x: centerX + (nodes.x - centerX) * 3,
+        y: centerY + (nodes.y - centerY) * 3,
         r: 0,
-        radius: node.r,
+        radius: nodes.r,
         name: data.label,
         uri: data.uri,
         nbrPages: data.pages.length,
         pages: data.pages,
-        id : data.id
-    }
-})
-    ;
+        id : data.id,
+        degree: data.avgDegree
 
+        }
+    });
+    //separated dataset for the forcesimulation which is needed for the slider
+    data.links.forEach(function(d,i){
+        d.index=i
+    })
+    var forcenodedata = nodesData.map(function(node, i) {
+        return node;
+    })
+    var forcelinkdata = data.links.map(function(link, i) {
+        return link;
+    })
+    console.log(nodesData)
+    nodesData.forEach(function(node,i){
+        console.log(node)
+        node.rank = i+1
+
+        node.associatedLinks = data.links.filter(function(link,j){
+            console.log(link)
+            console.log(link.source,link.target,node.id)
+            return link.source == node.id || link.target==node.id;
+        })
+    })
+
+    nodesData.forEach(function(node, i) {
+
+        node.associatedNodes = []
+        node.associatedLinks.forEach(function(link, j) {
+            if (link.source !== node.id) {
+                node.associatedNodes.push(nodesData.find(x => x.id === link.source))
+            }
+            else {
+                node.associatedNodes.push(nodesData.find(x => x.id === link.target))
+            }
+        })
+    })
     console.log(data.links)
-    svg = d3.select("#svg_bubblegraph")
-    simulation.nodes(nodes).on("tick", ticked);
-    simulation.force("link").links(data.links);
-
+    simulation.nodes(forcenodedata).on("tick", ticked);
+    simulation.force("link").links(forcelinkdata);
 
 
 //var radius = d3.scaleSqrt().domain([0,1]).range([25,50]);
@@ -116,11 +140,13 @@ function drawBubbleGraph(data) {
                         .attr("d", "M0,-5L10,0L0,5");
 
 
-    var link = svg.append("g")
+    var links = svg
+            .append("g")
             .attr("class", "links")
             .selectAll("path")
-            .data(data.links)
+            .data(simulation.force("link").links())
             .enter().append("svg:path")
+            .attr("class","link")
             .attr("stroke-width", function(d) { return 1 })
             .attr("marker-end", "url(#end)");
 
@@ -128,15 +154,15 @@ function drawBubbleGraph(data) {
 
 
 
-      link.style('fill', 'none')
+      links.style('fill', 'none')
             .style('stroke', 'black')
           .style("stroke-width", '2px');
 
 
-    let node = svg.append("g")
+    let nodes = svg.append("g")
         .attr("class", "bubblegraph")
         .selectAll('.node')
-        .data(nodes)
+        .data(forcenodedata)
         .enter().append('g')
         .attr('class', 'node')
         //.style('opacity', 0.2)
@@ -155,8 +181,8 @@ function drawBubbleGraph(data) {
             .on("drag", dragged)
             .on("end", dragended));
 
-    node.append('circle')
-        .attr('id', d => "c_" + d.index)
+    nodes.append('circle')
+        .attr('id', d => "c_" + d.id)
         .attr('r', 0)
         .attr("class", "circle")
         .style("stroke-width", 0.5)
@@ -166,21 +192,19 @@ function drawBubbleGraph(data) {
                 return "lightgrey";
             } else {
                 return defineColor(d)
-
             }
         })
         .transition().duration(2000).ease(d3.easeElasticOut)
         .tween('circleIn', (d) => {
         let i = d3.interpolateNumber(0, scaleRadius(d.nbrPages));
-    return (t) =>
-    {
-        d.r = i(t);
-        simulation.force('collide', forceCollide);
-    }
-});
+    return (t) =>{
+            d.r = i(t);
+            simulation.force('collide', forceCollide);
+        }
+    });
 
 
-    node.append('text')
+    nodes.append('text')
         .attr("id", function (d, i) {
             return "t_" + i
         })
@@ -198,7 +222,7 @@ function drawBubbleGraph(data) {
             return d.name
         })
         .each(function (d, i) {
-            let r = d3.select("circle[id='c_" + i + "']").attr("r")
+            let r = d3.select("circle[id='c_" + d.id + "']").attr("r")
             //console.log(r)
             svg.select("#t_" + i)
                 .call(wrap2, 2 * r)
@@ -234,7 +258,7 @@ function drawBubbleGraph(data) {
                 focusNode.fx = null;
                 focusNode.fy = null;
                 console.log(focusNode)
-                simulation.alphaTarget(0.2).restart();
+                simulation.alphaTarget(0.35).restart();
                 d3.transition().duration(1000).ease(d3.easePolyOut)
                     .tween('moveOut', function () {
 
@@ -271,7 +295,7 @@ function drawBubbleGraph(data) {
 
                 d3.selectAll('.node')
                     .filter(function (d, i) {
-                        return i !== focusNode.index;
+                        return d.id !== focusNode.id;
                     })
                     .transition().duration(2000)
                     .style('opacity', 1.0);
@@ -292,47 +316,116 @@ function drawBubbleGraph(data) {
 
 
     function ticked() {
-       link.attr("d", function(d) {
+
+        var link = svg.selectAll(".link")
+        .data(simulation.force("link").links(),function(d){
             //console.log(d)
+            return d.index
+        })
+
+       link.attr("d", function(d) {
         var dx = d.target.x - d.source.x,
             dy = d.target.y - d.source.y,
             dr = Math.sqrt(dx * dx + dy * dy),
 
             offsetTargetX = (dx * d.target.r)/dr,
-            offsetTargetY = (dy * d.target.r)/dr,
-            offsetSourceX = (dx * d.source.r) /dr,
-            offsetSourceY = (dy * d.source.r) /dr;
-        //console.log(d,offsetTargetX,offsetTargetY)
+            offsetTargetY = (dy * d.target.r)/dr
+
         return "M" +
             d.source.x + "," +
             d.source.y + "A" +
             dr + "," + dr + " 0 0,1 " +
             (d.target.x-offsetTargetX)+ "," +
             (d.target.y-offsetTargetY);
-            //return "M" + (d.source.x-offsetSourceX) + "," + (d.source.y-offsetSourceY) + "L" + (d.target.x-offsetTargetX) + "," + (d.target.y-offsetTargetY);
 
-    });
-       /*link.attr("d", function(d){
-      var dx = d.target.x - d.source.x,
-          dy = d.target.y - d.source.y,
-          dr = Math.sqrt(dx * dx + dy * dy),
-          gamma = Math.atan2(dy, dx), // Math.atan2 returns the angle in the correct quadrant as opposed to Math.atan
-          sx = Math.max(d.source.r, Math.min(width - d.source.r,  d.source.x + (Math.cos(gamma) * d.source.r)  )),
-          sy = Math.max(d.source.r, Math.min(height - d.source.r,  d.source.y + (Math.sin(gamma) * d.source.r)  )),
-          // Recall that 10 is the size of the arrow
-          tx = Math.max(d.target.r, Math.min(width - d.target.r,  d.target.x - (Math.cos(gamma) * (d.target.r +12))  )),
-          ty = Math.max(d.target.r, Math.min(height - d.target.r,  d.target.y - (Math.sin(gamma) * (d.target.r +12))  ));
-      // If you like a tighter curve, you may recalculate dx dy dr:
-      //dx = tx - sx;
-      //dy = ty - sy;
-      //dr = Math.sqrt(dx * dx + dy * dy);
-      return "M" + sx + "," + sy + "A" + dr + "," + dr + " 0 0,1 " + tx + "," + ty;
-    });
-        /*link
-        .attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });*/
+        });
+
+        link.exit().remove()
+
+    linkEnter = link.enter().append("svg:path").moveToBack()
+        .attr("class", "link")
+        .attr("stroke-width", function(d) { return 1 })
+        .attr("marker-end", "url(#end)");
+
+    linkEnter.style('fill', 'none')
+        .style('stroke', 'black')
+        .style("stroke-width", '2px')
+
+    var node = svg.selectAll(".node")
+        .data(simulation.nodes(),function(d){
+             //console.log(d.index)
+             return d.index
+         })
+    nodeEnter =node.enter().append('g')
+        .attr('class', 'node')
+        .style('opacity', function(d) {
+            if (pageMode){
+                if(d.pages.includes("Page " + shownPage)){
+                    return 1
+                }else{
+                    return 0.25
+
+                }
+            }
+
+            else{
+                return 1
+
+            }
+
+        })
+
+        .on("click", async function (d) {
+            await moveToCenter(d)
+        })
+        .call(
+            d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended))
+
+     nodeEnter.append("circle")
+            .attr('id', d => "c_" + d.id)
+            .attr('r', 0)
+            .attr("class", "circle")
+            .style("stroke-width",0.5)
+            .style("stroke","black")
+            .style('fill', function (d) {
+            if (d.nbrPages == 0) {
+                return "lightgrey";
+            } else {
+                return defineColor(d)
+            }
+        })
+        nodeEnter.append('text')
+        .attr("id", function (d, i) {
+            return "t_" + i
+        })
+        .attr("class", "nodeText")
+        //.attr("dy", ".3em")
+        .attr("x", function (d) {
+            return 0
+        })
+        .attr("y", function (d) {
+            return 0
+
+        })
+        .style("text-anchor", "middle")
+        .text(function (d) {
+            return d.name
+        })
+        .each(function (d, i) {
+
+            let r = d3.select("circle[id='c_" + d.id + "']").attr("r")
+
+            svg.select("#t_" + i)
+                .call(wrap2, 2 * r)
+
+        })
+            .style("font-size", "15px")
+
+    node.exit().remove()
+
 
 
         node.attr("transform", function (d) {
@@ -345,7 +438,7 @@ function drawBubbleGraph(data) {
     async function deselect(nodeClicked) {
         //console.log(nodeClicked)
         simulation.alphaTarget(0.2).restart();
-        node.filter(function (d, i) {
+        nodes.filter(function (d, i) {
             return i === nodeClicked.index
         }).transition().duration(800)
             .tween("deselect", function (d) {
@@ -405,14 +498,15 @@ function drawBubbleGraph(data) {
         if (infoBox) {
             infoBox.remove()
         }
+        simulation.alphaTarget(0.2).restart()
 
         if (lastNode) {
             console.log("lastNode", lastNode)
 
             lastNode.fx = null;
             lastNode.fy = null;
-            node.filter(function (d, i) {
-                return i === lastNode.index
+            d3.selectAll('.node').filter(function (d, i) {
+                return d.id === lastNode.id
             })
                 .transition().duration(2000)
                 .tween('circleOut', await
@@ -433,7 +527,7 @@ function drawBubbleGraph(data) {
         .
             on('interrupt', () => {
                 lastNode.r = scaleRadius(lastNode.nbrPages);
-            let circle = d3.select("circle[id='c_" + lastNode.index + "']")
+            let circle = d3.select("circle[id='c_" + lastNode.id + "']")
             circle.style('fill', function (d) {
                 if (lastNode.nbrPages === 0) {
                     return "lightgrey";
@@ -475,73 +569,22 @@ function drawBubbleGraph(data) {
             .on('end', () => {
             drawArc(currentNode)
             highlightWords(currentNode)
-
-
-
-        }
-    )
-    .
-        on('interrupt', () => {
+        })
+        .on('interrupt', () => {
             console.log('move interrupt', currentNode);
         currentNode.fx = null;
         currentNode.fy = null;
         simulation.alphaTarget(0);
-    })
-        ;
+    });
         d3.selectAll('.node')
             .filter(function (d, i) {
                 return i !== currentNode.index;
             })
             .transition().duration(2000)
             .style('opacity', 0.5);
-        //drawArc(currentNode)
-        /*
-        d3.selectAll('.node')
-            .filter(function(d,i) { return i === currentNode.index; })
-            .transition().duration(1000)
-            .tween('transform', function(d) {
-                var that = d3.select(this);
-
-                return function (t) {
-                    that.attr('transform', function (d) {
-                        var k = "translate(" + width / 2 + "," + height / 2 +")";
-                        return k
-                    })
-                    simulation.nodes(data)
-                }
-            })*/
-        /*
-        d3.selectAll('.node')
-            .filter(function(d,i){
-                return i === currentNode.index
-            })
-            .transition().duration(1000)
-            .attrTween('transform', function(){
-                var k = "translate(" + width / 2 + "," + height / 2 +")";
-                return k
-            })
-
-    */
-
-
-        /*
-        var clickedNode = d3.select("#n_"+d.index)
-        console.log(clickedNode)
-        d3.selectAll('.node').on("tick",ticked);
-        simulation
-            .nodes(data)
-            .on("tick", ticked);
-
-        clickedNode.transition().attr('transform',function(d){
-            d3.selectAll('.node').on("tick",ticked);
-            simulation
-                .nodes(data)
-                .on("tick", ticked);
-
-            var k = "translate(" + width / 2 + "," + height / 2 +")";
-            return k
-        })*/
+    stabilize()
     }
+
 
 
     async function drawArc(currentNode) {
@@ -869,7 +912,171 @@ function drawBubbleGraph(data) {
         selection.style("stroke", "White")
         selection.style("stroke-width", "1")
     }
+    //sliderstuff
+    function update(h) {
 
+    nodesData.forEach(function(d,i){
+        var idx =-1;
+        simulation.nodes().forEach(function(node,j){
+            if(node.index===d.index){
+                idx=j
+            }
+
+        });
+        if(d.rank <= h){
+
+            if(idx === -1){
+                simulation.nodes().push(d)
+                d.associatedNodes.forEach(function(node,i){
+                    var nIdx = -1;
+                    simulation.nodes().forEach(function(fnode,j){
+                        if(node.index===fnode.index){
+                            d.associatedLinks.forEach(function(link,k){
+                                if(link.target.id ===fnode.id || link.source.id===fnode.id){
+                                    simulation.force("link").links().push(link)
+
+                                }
+                            })
+                        }
+                    })
+                })
+            }
+            else{
+
+            }
+        }
+        else{
+                    //console.log("sin am else")
+
+            if(idx!==-1){
+                                            //console.log("sin am !-1")
+                                            //console.log(simulation.nodes()[idx])
+
+                simulation.nodes()[idx].associatedLinks.forEach(function(link,i){
+                    var lIdx =-1;
+
+                    simulation.force("link").links().forEach(function(llink,j){
+
+                        if(llink.index===link.index){
+                            lIdx=j;
+                            //console.log("links splicen")
+
+                        }
+                    })
+
+                    simulation.force("link").links().splice(lIdx,1)
+
+                })
+                simulation.nodes().splice(idx,1)
+            }
+        }
+    })
+
+    simulation.alphaTarget(0.2).restart()
+    simulation.force('collide', forceCollide);
+    stabilize()
+
+    }
+    function stabilize(){
+        setTimeout(function(){
+
+            simulation.alphaTarget(0);
+        }, 5000);
+    }
+    var step = 1,
+        range = [1,nodesData.length],
+        initialValue = Math.round(nodesData.length / 2)
+        console.log(initialValue,nodesData.length)
+
+    var slider = svg.append('g')
+        .classed('slider', true)
+        .attr('transform', 'translate('+(centerX-width/6)+', '+(height*0.95)+'30)');
+
+    // using clamp here to avoid slider exceeding the range limits
+    var xScale = d3.scaleLinear()
+        .domain(range)
+        .range([0, width/3])
+        .clamp(true);
+
+    // array useful for step sliders
+    var rangeValues = d3.range(range[0], range[1], step || 1).concat(range[1]);
+    var xAxis = d3.axisBottom(xScale).tickFormat(function (d) {
+        return d;
+    });
+    xAxis.tickValues(xScale.ticks(5).concat(xScale.domain()))
+
+    xScale.clamp(true);
+    // drag behavior initialization
+    var drag = d3.drag()
+        .on('start.interrupt', function () {
+            slider.interrupt();
+        }).on('end drag', function () {
+            dragSlider(d3.event.x);
+        });
+
+    // this is the main bar with a stroke (applied through CSS)
+    var track = slider.append('line').attr('class', 'track')
+        .attr('x1', xScale.range()[0])
+        .attr('x2', xScale.range()[1]);
+
+    // this is a bar (steelblue) that's inside the main "track" to make it look like a rect with a border
+    var trackInset = d3.select(slider.node().appendChild(track.node().cloneNode())).attr('class', 'track-inset');
+
+    var ticks = slider.append('g').attr('class', 'ticks').attr('transform', 'translate(0, 4)')
+        .call(xAxis);
+
+    // drag handle
+    var handle = slider.append('circle').classed('handle', true)
+        .attr('r', 8);
+
+    // this is the bar on top of above tracks with stroke = transparent and on which the drag behaviour is actually called
+    // try removing above 2 tracks and play around with the CSS for this track overlay, you'll see the difference
+    var trackOverlay = d3.select(slider.node().appendChild(track.node().cloneNode())).attr('class', 'track-overlay')
+        .call(drag);
+
+    // text to display
+    var text = svg.append('text').attr('transform', 'translate(' + (centerX) + ', ' + (height*0.99) + ')')
+        .text('Value: 0');
+
+
+
+    // initial transition
+    slider.transition().duration(750)
+        .tween("drag", function () {
+            var i = d3.interpolate(0, initialValue);
+            return function (t) {
+                dragSlider(xScale(i(t)));
+            }
+        });
+    function dragSlider(value) {
+
+    var x = xScale.invert(value), index = null, midPoint, cx, xVal;
+    if(step) {
+        // if step has a value, compute the midpoint based on range values and reposition the slider based on the mouse position
+        for (var i = 0; i < rangeValues.length - 1; i++) {
+            if (x >= rangeValues[i] && x <= rangeValues[i + 1]) {
+                index = i;
+                break;
+            }
+        }
+        midPoint = (rangeValues[index] + rangeValues[index + 1]) / 2;
+        if (x < midPoint) {
+            cx = xScale(rangeValues[index]);
+            xVal = rangeValues[index];
+        } else {
+            cx = xScale(rangeValues[index + 1]);
+            xVal = rangeValues[index + 1];
+        }
+    } else {
+        // if step is null or 0, return the drag value as is
+        cx = xScale(x);
+        xVal = x.toFixed(3);
+    }
+    // use xVal as drag value
+    handle.attr('cx', cx);
+    text.text('Value: ' + xVal);
+    update(xVal)
+    }
 
 
 
@@ -1078,6 +1285,14 @@ d3.selection.prototype.moveToFront = function () {
         this.parentNode.appendChild(this);
     })
 };
+d3.selection.prototype.moveToBack = function () {
+    return this.each(function () {
+        var firstChild = this.parentNode.firstChild;
+        if (firstChild) {
+            this.parentNode.insertBefore(this, firstChild);
+        }
+    });
+};
 
 function isEven(n) {
     return n % 2 == 0;
@@ -1127,3 +1342,6 @@ function wrap(text, width) {
         }
     });
 }
+
+
+
