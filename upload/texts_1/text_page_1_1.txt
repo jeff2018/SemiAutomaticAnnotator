@@ -1,0 +1,102 @@
+Ontology Coverage Tool and Document Browser
+for Learning Material Exploration
+
+Christian Grévisse, Jeff Meder, Jean Botev and Steffen Rothkugel
+Computer Science and Communications Research Unit
+University of Luxembourg
+6, Avenue de la Fonte L-4364 Esch-sur-Alzette, Luxembourg
+Email: christian.grevisse@uni.lu, jeff.meder.001 @student.uni.lu, jean.botev@uni.lu, steffen.rothkugel @uni.lu
+
+Abstract—Document collections in e-learning can cause issues
+to both learners and teachers. On one hand, inquiry from the
+vast corpus of available resources is non-trivial without adequate
+formulation support and semantic information. Implicit links
+between documents are hardly understood without a proper
+visualization. On the other hand, it is difficult for teachers
+to keep track of the topics covered by a large collection. In
+this paper, we present an ontology coverage tool and document
+browser for learning material exploration. Both learners and
+teachers can benefit from a visualization of an ontology and the
+documents related to the comprised concepts, overcoming the
+limitations of traditional file explorers. Guiding users through
+a visual query process, learners can quickly pinpoint relevant
+learning material. The visualization, which has been implemented
+as a web application using the D3.js JavaScript library, can
+be integrated into different e-learning applications to further
+enhance the workflow of learners. Finally, teachers are provided
+an overview of topic coverage within the collection.
+
+Index Terms—Document Collection Visualization; Learning
+Material; Visual Query Support; Ontology Coverage; Document
+Browser.
+
+I. INTRODUCTION
+
+The ever-growing amount of learning material can be an
+issue for both learners and teachers. Students can become over-
+whelmed by the vast corpus of available resources on a given
+set of topics. In addition, Meno’s paradox of inquiry aggravates
+the problem: If a learner does not know what he is looking
+for, a successful search for relevant documents is unlikely.
+Furthermore, a set of learning resources, like any other doc-
+ument collection, can contain both explicit and implicit links
+[1]. Explicit links between documents can be provided in the
+form of cross-references or hyperlinks, whereas implicit links
+are realized by documents covering the same set of topics. File
+management on current operating systems is mostly based on
+hierarchical file systems. Traditional file browsers are unable
+to present to the user implicit links between documents [1].
+Also, users need to remember file names and their location to
+be able to retrieve them. If the precise content is unknown,
+this is nearly impossible [2]. On the other hand, graph-based
+hypermedia systems like the World Wide Web (WWW) excel
+at handling explicit links, but require sophisticated search
+engines to properly discover implicit links between a user
+query and a document collection. However, formulating a
+successful query is hampered both by the mentioned paradox
+of inquiry and the ambiguity of natural language. Latter issue
+
+can be overcome by annotating learning material with semantic
+web technologies, such as ontologies. Even the use of concepts
+from lightweight ontologies can lower the risk of ambiguity
+
+[3].
+
+From a teacher’s point of view, learning material provided in
+a course ideally covers all the topics belonging to the learning
+outcomes. Depending on the type of subject and study domain,
+some aspects might be presented in the lecture, while other
+topics are covered in a practical exercise session or a project.
+In any case, the established list of concepts required to know
+at the end of a course should all have been covered in one way
+or another by the provided resources. However, depending on
+the length of the course period, the complexity of a subject
+or the granularity of a study domain, it may quickly become
+difficult to keep track of the already covered and still to be
+covered topics.
+
+In this paper, we present an ontology coverage tool and
+document browser for learning material exploration. Both
+learners and teachers can benefit from a visualization of an
+ontology and the documents related to the comprised concepts.
+Implicit links between concepts or documents can be grasped
+easier in such a visualization than in a traditional file system.
+In addition, query formulation is fostered through a visual
+browsing process. Integrating this visualization into different
+e-learning contexts, such as programming environments, au-
+thoring tools or serious games, can lower the risk of the inquiry
+paradox. Learners are enabled to quickly pinpoint resources
+relevant to their ad-hoc study necessities from the vast corpus,
+which may reduce the information overload and improve their
+work flow. Teachers, on the other hand, are given an overview
+of which ontology concepts have already been covered by the
+provided learning material and which still need to be covered.
+Our approach has been implemented as a web application
+using the D3.js JavaScript library.
+
+The remainder of this paper is organized as follows: in
+section II, we discuss related work from different research
+dimensions. We present our tool in section HI. Various ways
+of integrating the tool into different e-learning contexts are
+discussed in section IV. We conclude in section V, providing
+some ideas for future research.

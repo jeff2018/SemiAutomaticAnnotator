@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.4.0/css/bootstrap4-toggle.min.css"
+          rel="stylesheet">
+    <!-- <script type="text/javascript" src="/static/js/jquery.filedrop.js"></script>
+     <script type="text/javascript" src="/static/js/upload.js"></script>-->
+    <link href="../static/css/customstyle.css" rel="stylesheet">
+
+
+</head>
+<body>
+
+<div class="row no-gutters">
+
+    <div class="col no-gutters">
+
+        <div class="leftside ">
+            <nav class="navbar navbar-inverse navbar-fixed-top">
+                <div class="container vfill">
+                    <div id="controls-bar" class="row text-center inner-content">
+                        <div class="col-sm-3">
+                            <form class="form-inline">
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-default btn-sm" id="prevPage"
+                                            style="color:white"
+                                            disabled><span
+                                            class="fa fa-chevron-left" style="color:white"></span></button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-sm-6 text-center">
+                            <form class="form-inline" id="controls">
+                                <div class="form-group">
+                                    <input class="form-control text-center input-sm" id="page" placeholder="#" disabled
+                                           style="width:50px;">
+                                </div>
+                                <div class="form-group">
+                                    <p class="form-control-static" id="pageCount" style="color:white"></p>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-sm-3">
+                            <form class="form-inline">
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-default btn-sm" id="nextPage"
+                                            style="color:white"
+                                            disabled><span
+                                            class="fa fa-chevron-right" style="color:white"></span></button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="vfill pdfContainer">
+                <div id="pdfView" class="vfill pdfPlaceholder">
+                    <div class="inner-content">
+                        <button id="upload-button" class="btn btn-danger">Select PDF</button>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="col no-gutters">
+        <div class="modal"><p>Content loading</p></div>
+
+        <div class="overlay vfill">
+            <div class="centered">
+                <div id="loader"></div>
+                <p id="loadingtext">Content loading</p>
+            </div>
+
+        </div>
+        <div class="rightside">
+
+            <div class="inner-div" style="display:none">
+
+                <svg id="svg_bubblegraph" width=100% height=100% font-family="sans-serif" font-size="10"
+                     text-anchor="middle"></svg>
+
+                <input id="switch_modus" type="checkbox" data-toggle="toggle" data-onstyle="outline-info"
+                       data-offstyle="outline-light">
+
+            </div>
+
+        </div>
+    </div>
+    <form id="submit-form" name="file" enctype="multipart/form-data">{% csrf_token %}
+        <input type=file name=file id="file-to-upload" class="uploader" accept="application/pdf"/>
+        <input id="submit-input" class="uploader" type=button value=Upload>
+
+    </form>
+
+</div>
+
+<!--Optional Jquery, Popper, Bootstrap-->
+
+<script
+        src="https://code.jquery.com/jquery-3.4.1.js"
+        integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.4.0/js/bootstrap4-toggle.min.js"></script>
+
+<!--Optional JavaScript-->
+<script src="https://kit.fontawesome.com/a6813ad4bf.js"></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+
+<script src="../static/js/pdf.js"></script>
+<script src="../static/js/pdf.worker.js"></script>
+<script src="../static/js/viewer.js"></script>
+
+<script type="text/javascript" src="../static/js/bubblegraph.js"></script>
+<script type="text/javascript" src="../static/js/renderer.js"></script>
+<script type="text/javascript" src="../static/js/main.js"></script>
+
+</body>
+</html>
+
+<!--<div id="dropbox">
+                <span class="message">Drop files here to upload</span>
+                <button id="upload-button">Select PDF</button>
+                <input type="file" id="file-to-upload" accept="application/pdf"/>
+                <div id="pdf-main-container">
+                    <div id="pdf-loader">Loading document ...</div>
+                    <div id="pdf-contents">
+                        <div id="pdf-meta">
+                            <div id="pdf-buttons">
+                                <button id="pdf-pref">Previous</button>
+                                <button id="pdf-next">Next</button>
+                            </div>
+                            <div id="page-count-container">Pag <div id="pdf-current-page"></div>of<div id="pdf-total-pages"></div></div>
+                        </div>
+                        <canvas id="pdf-canvas"></canvas>
+                        <div id="page-loader">Loading page ...</div>
+                    </div>-->

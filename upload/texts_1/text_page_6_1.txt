@@ -1,0 +1,57 @@
+[10]
+
+[11]
+
+[12]
+
+[13]
+
+[14]
+
+[15]
+
+[16]
+
+[17]
+
+[18]
+
+F. Windhager, P. Federico, E. Mayr, G. Schreder, and M. Smuc, “A
+review of information visualization approaches and interfaces to digital
+cultural heritage collections,’ in FMT2016: Proceedings of the 9th
+Forum Media Technology, 2016, pp. 74-81.
+
+G. Qihong, Z. Min, L. Mingzhao, L. Ting, C. Yu, and Z. Baoyao,
+“Document visualization: an overview of current research,’ Wiley Inter-
+disciplinary Reviews: Computational Statistics, vol. 6, no. 1, pp. 19-36,
+2014.
+
+L. Zhuhadar, O. Nasraoui, and R. Wyatt, “Visual ontology-based in-
+formation retrieval system,’ in 2009 13th International Conference
+Information Visualisation, July 2009, pp. 419-426.
+
+A. Alhenshiri, S. Brooks, C. Watters, and M. Shepherd, “Augmenting the
+visual presentation of web search results,’ in 2010 Fifth International
+Conference on Digital Information Management (ICDIM), July 2010,
+pp. 101-107.
+
+A. Soylu, M. Giese, E. Jimenez-Ruiz, E. Kharlamov, D. Zheleznyakov,
+and I. Horrocks, “Ontology-based end-user visual query formulation:
+Why, what, who, how, and which?” Universal Access in the Information
+Society, vol. 16, no. 2, pp. 435-467, June 2017.
+
+K. Munir and M. S. Anjum, “The use of ontologies for effective
+knowledge modelling and information retrieval,’ Applied Computing and
+Informatics, vol. 14, no. 2, pp. 116 — 126, 2018.
+
+C. Grévisse, J. Botev, and S. Rothkugel, “An Extensible and Lightweight
+Modular Ontology for Programming Education,” in Advances in Com-
+puting, A. Solano and H. Ordofiez, Eds. Cham: Springer International
+Publishing, 2017, pp. 358-371.
+
+C. Grévisse, R. Manrique, O. Marifio, and S. Rothkugel, “Knowledge
+Graph-Based Teacher Support for Learning Material Authoring,” in
+Advances in Computing. Springer International Publishing, in press.
+C. Grévisse, J. Botev, and S. Rothkugel, “Yactul: An Extensible Game-
+Based Student Response Framework for Active Learning,” in Ponencias
+del XVIII Encuentro Internacional Virtual Educa, 2017.

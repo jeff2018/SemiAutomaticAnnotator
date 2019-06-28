@@ -1,0 +1,74 @@
+Fig. 1. Starting point showing the top-level concept and its children
+
+A. Ontology Browsing
+
+The starting point is the root concept of an ontology (or
+an ontology scheme in the case of an SKOS°-based ontology
+such as the ALMA ontology). As shown in figure 1, the top-
+most concept Node is at the center. The ontology (or ontology
+scheme) can be selected in the top-left dropdown menu. The
+small circles around this concept represent its direct children.
+Note that the background color of the parent concept is darker
+than the one of its children. This is a color-based visual cue
+used throughout the tool. When hovering over a child concept,
+its name is shown. The eyes icon is a visual cue to indicate
+that this concept itself also has children, including learning
+resources related to at least one of the concepts.
+
+Once a concept has been selected, a situation similar to the
+one in figure 2 is reached. Again, the deeper the level of a
+concept, the lighter its background color. Parent concepts are
+also displayed as a smaller screen object, similar to the top of
+a skyscraper appearing thinner from the ground perspective.
+Clicking on an upper concept allows to put this concept back
+into focus. In this case, the Statement concept is selected.
+The grey circles represent child concepts which do not have
+further children and have not been annotated on a resource.
+In opposition to this is the fire icon, which indicates that
+a concept has been heavily used in annotations throughout
+the document collection. Both visual cues help teachers in
+determining the coverage of ontology concepts in the learning
+material corpus. We have chosen this type of cue for showing
+that a concept is more or less used in annotations, and not
+a size-based one, as the size semantic is already used when
+showing the hierarchy. Also students can benefit from this
+feature, as a more frequently annotated concept might be an
+indicator for its importance. Finally, the PDF icon on the
+Statement concept indicates that there is a PDF document
+annotated with this concept. When hovering over the icon, a
+preview image of the resource is shown; clicking on the icon
+leads to a view as shown in figure 5.
+
+>https://www.w3.org/2004/02/skos/
+
+Fig. 2. Selected concept with its parent, children and documents
+
+ 
+
+ 
+
+ 
+
+Fig. 3. Navigation wheel with shortcuts
+
+Through a long press (i.e., clicking and holding) on a
+concept, a navigation wheel is shown, as seen in figure
+3. Although it is possible to traverse the hierarchy up by
+clicking on parent concepts, the number of parent concepts
+shown is limited. This is particularly necessary for very deep
+hierarchies, as the chain of parent concepts would fill up
+the entire screen while top-level concepts would be unrec-
+ognizably small. Therefore, the navigation wheel, with the
+currently selected concept at the center, proposes shortcuts to
+higher-level concepts. Apart from these, it is also possible to
+explore concepts related to the currently selected one. In the
+example, the concept If Condition from the C scheme of
+the ALMA ontology is related to the If concept from the
+Programming scheme. A view similar to the one shown in
+figure 2 about this concept is shown when clicking on the
+red part of the wheel. Finally, it is also possible to see the
+resources annotated with the currently selected concept when
+clicking on the orange part of the wheel. A view similar to
+figure 4 is then shown. As long as a shortcut is only hovered
+over and not clicked, the selection will not change. However,
+once a click occurs, the selection changes and the view adapts.

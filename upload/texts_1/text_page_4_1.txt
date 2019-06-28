@@ -1,0 +1,184 @@
+Cc ’ For-Loop| *If-Condition) = = == ~~ | SEARCH
+
+ 
+
+ 
+
+Equivalent loops
+
+  
+
+ 
+
+ 
+
+ae sete coupe
+Bee fee
++ es int n=3;
+*@ ted for (int i= ty i < my its) ( 1
+TRUE, sone ee be ce
++ expr2evak x017 Is FALSE greene pecs
+,
+)
+,
+
+Conditionals ForLoop
+c:ForLoop
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+(i
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+=
+6
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+The C Programming|
+Language
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Fig. 4. Resources for a set of selected concepts
+
+B. Resource Browsing
+
+Several concepts can also be selected at the same time
+by querying these concepts in the search field. The related
+resources are then presented as in figure 4. In order to avoid
+the inquiry paradox and support the user in the query, an
+integration of our visualization tool into different e-learning
+contexts is recommended, as discussed in section IV. As
+both concepts share the same parent, there is only a single
+ancestor tree. Learning material annotated with either one of
+the concepts are categorized with respect to their media type,
+e.g., PDF files or videos. For each resource, a preview image
+is shown, together with its name and the set of annotated
+concepts. The list can be horizontally scrolled.
+
+Finally, once a resource has been selected, as in figure
+5, it is centered on the screen, surrounded by the annotated
+concepts. Concepts from another ontology (or module) than
+the one currently explored are represented with a different
+background color: here, the red circle represents the Short
+circuit evaluation concept from the Programming
+scheme of the ALMA ontology. This allows to see how a
+document can be related to topics from different origins. For
+instance, if two different ontologies or ontology schemes are
+used in two subjects, this type of cross-curricular link of
+documents across subjects may support learners, particularly
+if they follow a global learning style, in understanding inter-
+disciplinary connections and dependencies. On another note,
+if related concepts have been annotated in other resources,
+these are again represented by respective icons. For example,
+this can be seen around the blue circle If Condition.
+Hovering over such an icon again shows a preview image
+of the corresponding document. This way, the implicit link
+between learning resources on the same topic can be easily
+grasped, both within the same subject and across subjects, due
+to the formerly mentioned cross-curricular relations within the
+learning material collection.
+
+C. Coverage
+
+To avoid that the teacher would have to browse through the
+whole ontology in order to discover grey circles representing
+
+Fig. 5. Selected resource with surrounding annotated concepts
+
+ 
+
+ 
+
+voy
+)
+
+{ &
+\ Sta
+x
+
+ 
+
+ 
+
+ 
+
+Fig. 6. Coverage view for teachers
+
+non-covered concepts, a different visualization, particular for
+teachers, can be used as shown in figure 6. Here, all the non-
+covered concepts are in focus and shown at the same time. This
+view 1s limited to discovering individual non-covered concepts,
+and is not recommended to be used when no material at all
+has been indexed for any concept in the ontology. Note that
+the hierarchy of these concepts is still shown, but with less
+opacity, to be able to locate their position within the ontology.
+Clicking on some of the blue circles leads back to a situation
+as shown in figure 2.
+
+As we have seen, our tool combines the visualization of
+an ontology with the exploration of related documents. Either
+a concept or a resource can be focused on, with the related
+resources respectively the annotated concepts around.
+
+IV. INTEGRATION OPPORTUNITIES
+
+As discussed in section III, concepts respectively resources
+can be browsed through a visual navigation process. However,
+it is still possible to query a concept directly by searching for
+it, as shown in figure 4. In order to avoid both a lengthy visual
+navigation on one hand and the inquiry paradox on the other
+hand, our Web-based tool can be integrated into different e-
+learning contexts.

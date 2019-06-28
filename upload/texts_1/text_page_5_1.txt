@@ -1,0 +1,146 @@
+eae ¢) runtime-EclipseApplication - Control FI low/main.c - Eclipse
+im Br &- im Oe & iv Biv [fe Ge HOE SSH MHF @ Fr FlreOGGre-
+
+ER
+1 &
+a {al
+
+= Bmainc
+& 1 #include<stdio.h>
+. 3eint maind {
+forCint i = 0; i < 100; i++) {
+ifGi % 2 = 0) {
+printfC"%d\n", i);
+
+y
+}
+
+ 
+
+10
+11 return Q;
+12 |}
+
+“x% APS we Oem-co
+(Users/Christian/Dropbox/runtime-EclipseApplication/C<
+
+ 
+
+Fig. 7. Integration of our tool in Eclipse
+
+In [16], learning resources are suggested to computer sci-
+ence students within the Eclipse IDE. When selecting a piece
+of code a learner has understanding issues with, the respective
+elements from the abstract syntax tree are retrieved. Those
+elements are mapped to concepts in the ALMA ontology,
+and related learning material annotated with these concepts
+is proposed. This way, students can consult a set of resources
+directly from within the IDE. Using the visualization of our
+tool, as shown in figure 7, related concepts as well as implicitly
+related resources can be discovered. Through this process,
+students do not need to know the name of a concept a
+priori, but can rely on the mapping to the ontology and the
+visualization of concepts and documents.
+
+Integrating related learning material is also the focus of the
+work presented in [17], where authors of Office documents
+are enabled to have the main topics in the text recognized
+and linked to corresponding ontology concepts through entity
+linking tools. Users can then retrieve resources annotated with
+the recognized concepts, including knowledge base articles for
+biochemistry-related ontologies. Combining this Office plugin
+with our visualization, users could easily grasp the context of
+a document and the related topics.
+
+Finally, mobile serious games such as provided within
+the Yactul platform [18] can benefit from the integration of
+learning material. When a learner has issues with a quiz
+activity, providing related resources can help to clarify her
+doubts. As those activities on Yactul are also annotated with
+ontology concepts, and in combination with our tool, the
+previously mentioned advantages can also be brought to the
+serious game.
+
+Using these different integration strategies, the query for
+relevant documents becomes entirely visual. Learners are
+not required to have any prior knowledge on a concept to
+retrieve those resources, can grasp implicit links between
+documents in the collection and understand cross-curricular
+relations between concepts. Throughout this purely visual
+exploration process, neither file names nor locations have to
+be remembered.
+
+V. CONCLUSIONS & FUTURE WORK
+
+In this paper, we have presented an ontology coverage
+tool and document browser for learning material exploration.
+Users can browse through a vast corpus of semantically
+enhanced learning material and are enabled to pinpoint doc-
+uments relevant to their study process through a visual query
+formulation support. Implicit and cross-curricular relations
+between concepts and resources can be easily grasped. A
+variety of visual cues including icons, coloring schemes and
+interactions also help teachers to evaluate the coverage of
+concepts within the document collection. Furthermore, the
+integration of this Web-based visualization into different e-
+learning applications overcomes the limitations of traditional
+file explorers, improves the workflow of learners and avoids
+Meno’s paradox of inquiry.
+
+There are several directions for future work. First, the
+visualization could not only benefit from learning resources
+explicitly indexed on a repository, but it could also suggest
+related knowledge base articles, which is particularly inter-
+esting when using life science ontologies. Furthermore, our
+tool currently relies only on already indexed resources, but a
+next step could allow teachers to drag and drop documents
+onto the interface. A semi-automatic annotation process based
+on concept recognition and entity linking tools would then
+index this new material, which would then appear in the
+visualization, as well. Finally, popular query patterns could be
+logged on a per-user basis, so that teachers can understand
+their students’ search behavior, whereas students could be
+given a personalized list of implicit bookmarks.
+
+REFERENCES
+
+[1] K. A. Olsen, R. R. Korfhage, K. M. Sochats, M. B. Spring, and J. G.
+Williams, “Visualization of a Document Collection with Implicit and
+Explicit Links: the ViBe System,” Scandinavian Journal of Information
+Systems, vol. 5, pp. 79-95, 1993.
+
+[2] H. L. Kim, H. G. Kim, and K.-M. Park, “Ontalk: Ontology-based
+personal document management system,” in Proceedings of the 13th
+International World Wide Web Conference on Alternate Track Papers &
+Posters, ser. WWW Alt. ’04. ACM, 2004, pp. 420-421.
+
+[3] P. Andrews, I. Zaihrayeu, and J. Pane, “A Classification of Semantic
+Annotation Systems,’ Semantic Web, vol. 3, no. 3, pp. 223-248, 2012.
+
+[4] S. Lohmann, S. Negru, F. Haag, and T. Ertl, “Vowl 2: User-oriented
+visualization of ontologies,” in Knowledge Engineering and Knowledge
+Management, K. Janowicz, S. Schlobach, P. Lambrix, and E. Hyvénen,
+Eds. Cham: Springer International Publishing, 2014, pp. 266-281.
+
+[5] ——, “Visualizing ontologies with VOWL,” Semantic Web, vol. 7, pp.
+399-419, 2016.
+
+[6] A. Psyllidis, “OSMoSys: A Web Interface for Graph-Based RDF Data
+Visualization and Ontology Browsing,” in Engineering the Web in the
+Big Data Era, P. Cimiano, F. Frasincar, G.-J. Houben, and D. Schwabe,
+Eds. Cham: Springer International Publishing, 2015, pp. 679-682.
+
+[7] K. Padia, Y. AlNoamany, and M. C. Weigle, “Visualizing Digital
+Collections at Archive-it,’ in Proceedings of the 12th ACM/IEEE-CS
+Joint Conference on Digital Libraries, ser. JCDL ’12. ACM, 2012, pp.
+15-18.
+
+[8] W. Xu, M. Esteva, S. D. Jain, and V. Jain, “Analysis of large digital
+collections with interactive visualization,” in 201] IEEE Conference on
+Visual Analytics Science and Technology (VAST), October 2011, pp.
+241-250.
+
+[9] P. Bergstr6m and D. C. Atkinson, “Augmenting the exploration of digital
+libraries with web-based visualizations,’ in 2009 Fourth International
+Conference on Digital Information Management, November 2009, pp.
+1-7.
