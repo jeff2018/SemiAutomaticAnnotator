@@ -2,6 +2,7 @@ var text_layer
 var shownPage
 
 
+
 $('#switch_modus').change(function (d) {
     //console.log($("#page").val())
     if (!this.checked) {
@@ -15,7 +16,7 @@ $('#switch_modus').change(function (d) {
         documentMode = false
         d3.selectAll('.node')
             .filter(function (d) {
-                
+
                 return !d.pages.includes("Page " + shownPage)
             })
             .style('opacity', 0.25);
@@ -54,13 +55,13 @@ function switchPage(pageNum){
 
 function highlightConcepts(pageNum) {
     if (pageMode) {
-        d3.selectAll('circle')
+        d3.selectAll('.node')
             .filter(function (d) {
                 //console.log(d.pages.includes(pageNum))
                 return !d.pages.includes("Page " + pageNum)
             })
             .style('opacity', 0.25);
-        d3.selectAll('circle')
+        d3.selectAll('.node')
             .filter(function (d) {
                 //console.log(d.pages.includes(pageNum))
                 return d.pages.includes("Page " + pageNum)

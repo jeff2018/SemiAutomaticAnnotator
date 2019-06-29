@@ -22,6 +22,46 @@ console.log(centerX, centerY)
 var color = d3.scaleSequential(d3.interpolateRainbow);
 var colorPage = d3.scaleOrdinal(d3.schemeCategory10);
 
+
+var defs = svg.append("defs")
+  .selectAll("foo")
+  .data(d3.range(10))
+  .enter()
+  .append("linearGradient")
+  .attr("id", function(d) {
+    return "grad" + d
+  })
+    .attr('gradientUnits', 'userSpaceOnUse')
+  .attr("x1", "0%")
+  .attr("x2", "0%")
+  .attr("y1", "100%")
+  .attr("y2", "0%")
+
+    defs.append("stop")
+      .attr("offset", "50%")
+      .style("stop-color", function(d) {
+        return colorPage(d)
+      })
+
+
+
+
+function updateStops(data,i) {
+    var stops = d3.select('#grad'+i).selectAll('stop')
+        .data(data);
+
+    stops.enter().append('stop');
+
+    stops
+        .attr('offset', function(d) { return d[0]; })
+
+
+
+
+    stops.exit().remove();
+}
+
+
 function drawBubbleGraph(data) {
 
     focusNode = null;
@@ -36,6 +76,16 @@ function drawBubbleGraph(data) {
     return b.avgDegree - a.avgDegree
     })
 
+
+    var maxPerFreqArray = data.nodes.map(d => Math.max.apply(null, d.frequency));
+    var maxFrequency = Math.max.apply(null,maxPerFreqArray)
+    var minPerFreqArray = data.nodes.map(d => Math.min.apply(null, d.frequency));
+    var minFrequency = Math.min.apply(null,minPerFreqArray)
+
+    var maxID = Math.max.apply(Math, data.nodes.map(function(d) { return d.id; }))
+    console.log(maxID)
+
+    var scaleGradient = d3.scaleLinear().domain([minFrequency,maxFrequency]).range([1,100])
 
     let pack = d3.pack()
         .size([width, height])
@@ -78,6 +128,7 @@ function drawBubbleGraph(data) {
         uri: data.uri,
         nbrPages: data.pages.length,
         pages: data.pages,
+        frequency:data.frequency,
         id : data.id,
         degree: data.avgDegree
 
@@ -95,12 +146,10 @@ function drawBubbleGraph(data) {
     })
     console.log(nodesData)
     nodesData.forEach(function(node,i){
-        console.log(node)
         node.rank = i+1
 
         node.associatedLinks = data.links.filter(function(link,j){
-            console.log(link)
-            console.log(link.source,link.target,node.id)
+
             return link.source == node.id || link.target==node.id;
         })
     })
@@ -168,6 +217,7 @@ function drawBubbleGraph(data) {
         //.style('opacity', 0.2)
         .on("click", async function (d) {
         if (d3.event.shiftKey) {
+            console.log("shift")
             d.pages = []
             d.nbrPages = 0
             deselect(d)
@@ -252,6 +302,32 @@ function drawBubbleGraph(data) {
                 return;
             }
 
+            if (d3.event.shiftKey && target.closest("#svg_bubblegraph")){
+
+                var addedNode = {"degree":1,
+                                "frequency":[],
+                                "name":"New_Concept",
+                                "nbrPages":0,
+                                "pages":[],
+                                "r":45,
+                                "associatedLinks":[],
+                                "associatedNodes":[],
+                                "x":0,
+                                "y":0,
+                                "id":maxID+1,
+                                "rank":0,
+                                "index":33}
+                maxID=maxID+1
+                nodesData.push(addedNode)
+                simulation.nodes().push(addedNode)
+                simulation.nodes(simulation.nodes())
+                console.log(nodesData)
+                console.log(simulation.nodes())
+                restart()
+                stabilize()
+                return
+            }
+
             if (!target.closest(".circle") && focusNode) {
                 removeHighlightWords(focusNode)
 
@@ -314,44 +390,9 @@ function drawBubbleGraph(data) {
         }
     )
 
+    function restart(){
 
-    function ticked() {
-
-        var link = svg.selectAll(".link")
-        .data(simulation.force("link").links(),function(d){
-            //console.log(d)
-            return d.index
-        })
-
-       link.attr("d", function(d) {
-        var dx = d.target.x - d.source.x,
-            dy = d.target.y - d.source.y,
-            dr = Math.sqrt(dx * dx + dy * dy),
-
-            offsetTargetX = (dx * d.target.r)/dr,
-            offsetTargetY = (dy * d.target.r)/dr
-
-        return "M" +
-            d.source.x + "," +
-            d.source.y + "A" +
-            dr + "," + dr + " 0 0,1 " +
-            (d.target.x-offsetTargetX)+ "," +
-            (d.target.y-offsetTargetY);
-
-        });
-
-        link.exit().remove()
-
-    linkEnter = link.enter().append("svg:path").moveToBack()
-        .attr("class", "link")
-        .attr("stroke-width", function(d) { return 1 })
-        .attr("marker-end", "url(#end)");
-
-    linkEnter.style('fill', 'none')
-        .style('stroke', 'black')
-        .style("stroke-width", '2px')
-
-    var node = svg.selectAll(".node")
+        var node = svg.selectAll(".node")
         .data(simulation.nodes(),function(d){
              //console.log(d.index)
              return d.index
@@ -376,6 +417,14 @@ function drawBubbleGraph(data) {
         })
 
         .on("click", async function (d) {
+
+
+            if (d3.event.shiftKey) {
+            d.pages = []
+            d.nbrPages = 0
+            deselect(d)
+            return;
+        }
             await moveToCenter(d)
         })
         .call(
@@ -392,6 +441,9 @@ function drawBubbleGraph(data) {
             .style("stroke","black")
             .style('fill', function (d) {
             if (d.nbrPages == 0) {
+                if (d.name=="New_Concept"){
+                    return "white"
+                }
                 return "lightgrey";
             } else {
                 return defineColor(d)
@@ -426,6 +478,55 @@ function drawBubbleGraph(data) {
 
     node.exit().remove()
 
+         var link = svg.selectAll(".link")
+        .data(simulation.force("link").links(),function(d){
+            //console.log(d)
+            return d.index
+        })
+
+    linkEnter = link.enter().append("svg:path").moveToBack()
+        .attr("class", "link")
+        .attr("stroke-width", function(d) { return 1 })
+        .attr("marker-end", "url(#end)");
+
+    linkEnter.style('fill', 'none')
+        .style('stroke', 'black')
+        .style("stroke-width", '2px')
+
+        link.exit().remove()
+
+        simulation.alphaTarget(0.2).restart();
+
+    }
+
+
+    function ticked() {
+
+
+         var link = svg.selectAll(".link")
+
+       link.attr("d", function(d) {
+        var dx = d.target.x - d.source.x,
+            dy = d.target.y - d.source.y,
+            dr = Math.sqrt(dx * dx + dy * dy),
+
+            offsetTargetX = (dx * d.target.r)/dr,
+            offsetTargetY = (dy * d.target.r)/dr
+
+        return "M" +
+            d.source.x + "," +
+            d.source.y + "A" +
+            dr + "," + dr + " 0 0,1 " +
+            (d.target.x-offsetTargetX)+ "," +
+            (d.target.y-offsetTargetY);
+
+        });
+
+
+
+
+        var node = svg.selectAll(".node")
+
 
 
         node.attr("transform", function (d) {
@@ -452,7 +553,7 @@ function drawBubbleGraph(data) {
             .on('interrupt', () => {
                 console.log("interupt")
                 nodeClicked.r = scaleRadius(nodeClicked.nbrPages);
-                let circle = d3.select("circle[id='c_" + nodeClicked.index + "']")
+                let circle = d3.select("circle[id='c_" + nodeClicked.id + "']")
                 circle.style('fill', function (d) {
 
                     return "lightgrey";
@@ -461,7 +562,7 @@ function drawBubbleGraph(data) {
             })
             .on('end',()=>{
                 nodeClicked.r = scaleRadius(nodeClicked.nbrPages);
-                let circle = d3.select("circle[id='c_" + nodeClicked.index + "']")
+                let circle = d3.select("circle[id='c_" + nodeClicked.id + "']")
                 circle.style('fill', function (d) {
 
                     return "lightgrey";
@@ -470,6 +571,7 @@ function drawBubbleGraph(data) {
                 console.log("end")
         })
         simulation.alphaTarget(0.2).restart()
+        stabilize()
 
     }
 
@@ -659,14 +761,29 @@ function drawBubbleGraph(data) {
             .attr("fill", function (d, i) {
                 //console.log(currentNode.pages)
                 if (currentNode.pages.includes(d.data)) {
-                    return colorPage(i);
+                    var colorgradient = scaleGradient(currentNode.frequency[i])
+                    console.log(colorgradient, currentNode.frequency[i])
+                    var colorgradientWhite = 100-colorgradient
+                    //updateStops([[colorgradientWhite+"%"], [colorgradient+"%"]],i)
+                    return "url(#grad"+i+")";
                 } else {
                     return "lightgrey"
                 }
 
             })
+            .style("opacity",1)/*function(d,i){
+                //console.log(d.data,i,d,currentNode.pages,currentNode.frequency)
+
+                if(currentNode.pages.includes(d.data)){
+                    var freq =currentNode.frequency[i]
+                    return scaleOpacity(freq)
+
+                }else{
+                    return 1
+                }
+            })*/
             .style("stroke", "White")
-            .style("stroke-widht", "2")
+            .style("stroke-width", 2)
             .transition()
             .attrTween('d', function (d) {
                 var i = d3.interpolate(d.startAngle + 0.1, d.endAngle);
@@ -705,7 +822,12 @@ function drawBubbleGraph(data) {
 
 
     })
-        await drawInfoBox(currentNode)
+        if(currentNode.name!=="New_Concept"){
+            await drawInfoBox(currentNode)
+
+        }else{
+                await drawEditBox(currentNode)
+        }
 
         function updatePageSelection(d) {
             var pages = currentNode.pages
@@ -727,6 +849,28 @@ function drawBubbleGraph(data) {
 
     }
 
+    async function drawEditBox(currentNode){
+        var posX = currentNode.fx - ((maxRadiusFocusNode + (maxRadiusFocusNode / 2.5)) / 2)
+        var posY = currentNode.fy - ((maxRadiusFocusNode + (maxRadiusFocusNode / 2.5)) / 2)
+        var boxWidth = maxRadiusFocusNode + (maxRadiusFocusNode / 2.5)
+
+        infoBox = svg.selectAll("infobox")
+            .data([1])
+            .enter()
+            .append("g")
+            .attr('transform', 'translate(' + posX + ',' + posY + ')');
+
+
+
+        var infoRect = infoBox.append("rect")
+
+            .attr("class", "infoRect")
+            .attr("height", boxWidth)
+            .attr("width", boxWidth)
+            .attr("fill", "lightgrey")
+            .style("opacity", 0.85)
+    }
+
     async function drawInfoBox(currentNode) {
 
         var results = await querySPARQL(currentNode);
@@ -735,27 +879,7 @@ function drawBubbleGraph(data) {
         var posX = currentNode.fx - ((maxRadiusFocusNode + (maxRadiusFocusNode / 2.5)) / 2)
         var posY = currentNode.fy - ((maxRadiusFocusNode + (maxRadiusFocusNode / 2.5)) / 2)
         var boxWidth = maxRadiusFocusNode + (maxRadiusFocusNode / 2.5)
-        /*
-        var div = d3.select("#scroll")
-            .style("height",boxWidth+"px")
-            .style("width",boxWidth+"px")
-            .style("top",0 +"px")
-            .style("left",0 +"px")
 
-            .text(results[0][0].abstract.value)
-
-        var infobox = svg.append("g")
-            .attr("class","infobox")
-            .attr('transform', 'translate(' + posX + ',' + posY + ')');
-
-        var foreign = infobox.append("foreignObject")
-            .attr("width",boxWidth)
-            .attr("height",boxWidth)
-            .append(div)
-         .style("overflow-y","scroll")
-            .text(results[0][0].abstract.value)
-            .style("font-size", "14px")
-    */
         console.log("Boxwidth", boxWidth * 0.32)
         infoBox = svg.selectAll("infobox")
             .data(results)
@@ -763,16 +887,7 @@ function drawBubbleGraph(data) {
             .append("g")
             .attr('transform', 'translate(' + posX + ',' + posY + ')');
 
-        /* var fo= infoBox.append("foreignObject")
-             .attr('class',"container")
-             .attr("height", boxWidth)
-             .attr("width", boxWidth)
 
-         var div = fo.append("div")
-             .attr('class',"content")
-             .attr("id","viz")
-             .attr("height", boxWidth)
-             .attr("width", boxWidth)*/
 
         var infoRect = infoBox.append("rect")
 
@@ -971,8 +1086,9 @@ function drawBubbleGraph(data) {
             }
         }
     })
-
-    simulation.alphaTarget(0.2).restart()
+    simulation.nodes(simulation.nodes())
+    restart()
+    //simulation.alphaTarget(0.2).restart()
     simulation.force('collide', forceCollide);
     stabilize()
 

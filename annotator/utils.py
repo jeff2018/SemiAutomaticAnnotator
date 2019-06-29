@@ -72,6 +72,7 @@ def retrieveAnnotations(file):
         dict_links = links
         for d in dict:
             d['pages']=[]
+            d['frequency']=[]
             degree=0
             print(d)
             concept_id = d['id']
@@ -79,6 +80,7 @@ def retrieveAnnotations(file):
             for p in page_annot:
                 d['pages'].append(str("Page "+str(p.page)))
                 degree +=p.degree
+                d['frequency'].append(p.frequency)
             d['value'] = len(d['pages'])
             d['avgDegree'] = degree / d['value']
             d['words'] = []

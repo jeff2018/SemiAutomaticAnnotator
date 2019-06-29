@@ -10,7 +10,11 @@ var pdfPath = null,
 
 var container = document.getElementsByClassName("pdfContainer");
 
-const scale = 1.25
+var schemeConceptsMap = {}
+
+const almaBaseURL = 'https://alma.uni.lu'
+
+const scale = 1.1
 
 jQuery.fn.exists = function () {
     return this.length > 0;
@@ -258,6 +262,8 @@ $(function () {
 
     })
 
+    ontologyReset()
+
 
 })
 ;
@@ -386,3 +392,58 @@ function openGraph(evt, graphName) {
 
 
 }
+
+function ontologyReset() {
+
+	schemeConceptsMap = {};
+
+	downloadSchemes(function() {
+		//$("#addAnnotationsButton").prop('disabled', false)
+
+
+	});
+}
+
+function downloadSchemes(callback) {
+	request(almaBaseURL + '/api/schemes/', function (error, response, body) {
+		if(!error) {
+			data = JSON.parse(body);
+			//$("#addAnnotationsButton").prop('disabled', true);
+			downloadTagsByScheme(data.shift(), data, callback);
+		}
+	});
+
+}
+function downloadTagsByScheme(scheme, remainingSchemes, finalCallback) {
+	request(almaBaseURL + "/api/schemes/" + scheme.uri + "/", function (error, response, body) {
+		if(!error) {
+			data = JSON.parse(body);
+
+			$("#schemeList").append($('<option value="' + scheme.uri + '">' + scheme.title + '</option>'));
+
+			schemeConceptsMap[scheme.uri] = { 'title': scheme.title, 'concepts': [] };
+
+			for(var i = 0; i < data.length; i++) {
+				var concept = data[i];
+
+				if(concept.label.length > 0) {
+					schemeConceptsMap[scheme.uri].concepts.push(concept.uri);
+				}
+			}
+
+			if(remainingSchemes.length > 0) {
+				downloadTagsByScheme(remainingSchemes.shift(), remainingSchemes, finalCallback);
+			} else {
+				$("#schemeList").selectpicker('refresh').on('changed.bs.select', function (e) {
+					var selectedSchemes = $("#schemeList").val();
+
+
+				});
+
+
+				finalCallback();
+			}
+		}
+	});
+}
+
