@@ -1,4 +1,4 @@
-var pageArray = ["Page 1", "Page 2", "Page 3", "Page 4", "Page 5", "Page 6"];
+var pageArray=[]
 
 var $this = $('.inner-div'); // targeted div
 var offset = $this.offset();
@@ -65,6 +65,9 @@ function drawBubbleGraph(data) {
 
     focusNode = null;
 
+    for (var i = 1; i <= data.pages; i++) {
+            pageArray.push("Page " + i)
+    }
 
     var scaleRadius = d3.scaleLinear().domain([0, pageArray.length]).range([40, 75]);
     var maxRadiusFocusNode = centerY * 0.75;
@@ -73,6 +76,11 @@ function drawBubbleGraph(data) {
     data.nodes.sort(function (a, b) {
         return b.avgDegree - a.avgDegree
     })
+
+    console.log(data.pages)
+
+
+
 
 
     var maxPerFreqArray = data.nodes.map(d => Math.max.apply(null, d.frequency));

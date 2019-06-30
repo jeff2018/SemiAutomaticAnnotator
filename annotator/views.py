@@ -2,8 +2,9 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.core.files.storage import FileSystemStorage
 from .models import *
-from .utils import saveResource,retrieveAnnotations
+from .utils import saveResource,retrieveAnnotations,processCS
 from .analysePDF import processPDF
+
 import os
 import json
 
@@ -43,17 +44,29 @@ def processFile(request):
         data = json.loads(request.body)
         print(data)
         fileid = data['id']
-        f = PDF.objects.get(id=fileid)
-        if f:
-            print("id of file: "+str(f.id))
+        filename= data['name']
 
-            myFileName, myFileExt = os.path.splitext(f.filepath)
+        if filename.endswith('.pdf'):
 
-            if myFileExt.lower() == '.pdf':
-                processPDF(f)
-            res = {"message": "Processed "+str(f.name),"path":f.filepath,"filename":f.name,"id":f.id}
+            f = PDF.objects.get(id=fileid)
+            if f:
 
-            return JsonResponse(res)
+                print("id of file: "+str(f.id))
+
+                myFileName, myFileExt = os.path.splitext(f.filepath)
+
+                if myFileExt.lower() == '.pdf':
+                    processPDF(f)
+                res = {"message": "Processed "+str(f.name),"path":f.filepath,"filename":f.name,"id":f.id}
+
+
+
+                return JsonResponse(res)
+        if filename.endswith('.java') or filename.endswith('.c'):
+            f = CodeSnippet.objects.get(id=fileid)
+            if f:
+                processCS(f)
+
 
     return render(request,'annotator/index.html')
 

@@ -11,8 +11,8 @@ var pdfPath = null,
 var container = document.getElementsByClassName("pdfContainer");
 
 var schemeConceptsMap = {},
-    tagMap={},
-	schemeConceptsArray = [];
+    tagMap = {},
+    schemeConceptsArray = [];
 
 const almaBaseURL = 'https://alma.uni.lu'
 
@@ -122,8 +122,8 @@ function renderPage(num) {
                 viewport: viewport,
                 textDivs: []
             });
-            if(focusNode){
-                console.log("focus",focusNode)
+            if (focusNode) {
+                console.log("focus", focusNode)
                 highlightWords(focusNode)
 
             }
@@ -163,8 +163,8 @@ function onPrevPage() {
     pageNum--;
     queueRenderPage(pageNum);
     highlightConcepts(pageNum)
-    if(focusNode){
-        $(window).ready(function(){
+    if (focusNode) {
+        $(window).ready(function () {
             highlightWords(focusNode)
         })
     }
@@ -178,8 +178,8 @@ function onNextPage() {
     pageNum++;
     queueRenderPage(pageNum);
     highlightConcepts(pageNum)
-    if(focusNode){
-        $(window).ready(function(){
+    if (focusNode) {
+        $(window).ready(function () {
             highlightWords(focusNode)
         })
     }
@@ -189,14 +189,14 @@ function onNextPage() {
 $(function () {
 
     $('#addAnnotationsButton').click(function (e) {
-    //console.log("keydown",e)
-    var text =$("#schemeList option-select").text()
-    var conceptName =$("#concepts option-select").text()
+        //console.log("keydown",e)
+        var text = $("#schemeList option-select").text()
+        var conceptName = $("#concepts option-select").text()
 
-    console.log(text)
-    console.log(conceptName)
+        console.log(text)
+        console.log(conceptName)
 
-})
+    })
     // PDF controls
     $("#prevPage").click(onPrevPage);
     $("#nextPage").click(onNextPage);
@@ -229,11 +229,24 @@ $(function () {
 
 // When user chooses a PDF file
     $("#file-to-upload").on('change', function () {
+
+        if ($("#file-to-upload").get(0).files[0].name.endsWith('.java')) {
+            var javaFile = $("#file-to-upload").get(0).files[0]
+
+            placeFileContent(
+                document.getElementById('java-content'),
+                javaFile)
+            $('#navbarPdf').remove()
+            $('#pdfContainer').replaceWith('<div id="javaView" style="overflow-y:auto"></div>')
+            console.log()
+
+
+        }
         // Validate whether PDF
-        if (['application/pdf'].indexOf($("#file-to-upload").get(0).files[0].type) == -1) {
+        /*if (['application/pdf'].indexOf($("#file-to-upload").get(0).files[0].type) == -1) {
             alert('Error : Not a PDF');
             return;
-        }
+        }*/
         console.log("call on change")
         $("#upload-button").hide();
 
@@ -244,12 +257,15 @@ $(function () {
         //form.on('submit',function(){
         //  submitFile();
         //})
+        if ($("#file-to-upload").get(0).files[0].name.endsWith('.pdf')) {
+            openPDF(URL.createObjectURL($("#file-to-upload").get(0).files[0]))
 
+        }
 
         console.log(document.getElementById('submit-form'))
 
 
-        openPDF(URL.createObjectURL($("#file-to-upload").get(0).files[0]))
+
         $.when(submitFile().then(function successHandler(response) {
                 var filename = response.filename
                 var filepath = response.path
@@ -313,7 +329,8 @@ function wait(ms) {
 function askToProcess(file) {
     console.log(file)
     var data = {
-        "id": file.id
+        "id": file.id,
+        "name":file.filename
     }
     return $.ajax({
         type: "POST",
@@ -371,24 +388,23 @@ function retrieveAnnotations(fileid) {
             //document.getElementById("btn_bubblegraph").click();
             drawBubbleGraph(response.responseJSON)
 
-            initg= true
+            initg = true
         }
 
     })
 }
 
-function initGraph(data1){
+function initGraph(data1) {
     document.getElementById("btn_bubblegraph").click()
 
     drawBubbleGraph(data)
-
 
 
 }
 
 function openGraph(evt, graphName) {
 
-    console.log("opengraph",evt,graphName)
+    console.log("opengraph", evt, graphName)
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
@@ -407,72 +423,102 @@ function openGraph(evt, graphName) {
 
 function ontologyReset() {
 
-	schemeConceptsMap = {};
+    schemeConceptsMap = {};
 
-	downloadSchemes(function() {
-		//$("#addAnnotationsButton").prop('disabled', false)
+    downloadSchemes(function () {
+        //$("#addAnnotationsButton").prop('disabled', false)
 
 
-	});
+    });
 }
 
 function downloadSchemes(callback) {
     $.ajax({
-        url: almaBaseURL+'/api/schemes/',
-        type:"GET",
-        dataType:"json",
-        success:function(response){
+        url: almaBaseURL + '/api/schemes/',
+        type: "GET",
+        dataType: "json",
+        success: function (response) {
             var data = response
             //console.log(data)
-            downloadTagsByScheme(data.shift(),data,callback)
+            downloadTagsByScheme(data.shift(), data, callback)
 
         },
 
     })
 
-	/*request(almaBaseURL + '/api/schemes/', function (error, response, body) {
-		if(!error) {
-			data = JSON.parse(body);
-			//$("#addAnnotationsButton").prop('disabled', true);
-			downloadTagsByScheme(data.shift(), data, callback);
-		}
-	});*/
+    /*request(almaBaseURL + '/api/schemes/', function (error, response, body) {
+        if(!error) {
+            data = JSON.parse(body);
+            //$("#addAnnotationsButton").prop('disabled', true);
+            downloadTagsByScheme(data.shift(), data, callback);
+        }
+    });*/
 
 }
+
 function downloadTagsByScheme(scheme, remainingSchemes, finalCallback) {
 
     $.ajax({
-        url: almaBaseURL + '/api/schemes/' + scheme.uri+'/',
-        type:"GET",
-        dataType:"json",
-        success:function(data){
+        url: almaBaseURL + '/api/schemes/' + scheme.uri + '/',
+        type: "GET",
+        dataType: "json",
+        success: function (data) {
             //console.log(data)ß
-            schemeConceptsMap[scheme.uri]={'title':scheme.title,'concepts':[]}
-            var map ={'title':scheme.title,'concepts':[],'uri':scheme.uri}
-            for (var i = 0; i< data.length; i++){
+            schemeConceptsMap[scheme.uri] = {'title': scheme.title, 'concepts': []}
+            var map = {'title': scheme.title, 'concepts': [], 'uri': scheme.uri}
+            for (var i = 0; i < data.length; i++) {
                 var concept = data[i]
-                if(concept.label.length> 0){
-                    var c = { 'label': concept.label, 'scheme': scheme.title };
-					tagMap[concept.uri] = c;
+                if (concept.label.length > 0) {
+                    var c = {'label': concept.label, 'scheme': scheme.title};
+                    tagMap[concept.uri] = c;
 
                     schemeConceptsMap[scheme.uri].concepts.push(concept.uri)
                     map.concepts.push(concept.uri)
                 }
             }
             schemeConceptsArray.push(map)
-            if(remainingSchemes.length > 0) {
-				downloadTagsByScheme(remainingSchemes.shift(), remainingSchemes, finalCallback);
-			} else {
+            if (remainingSchemes.length > 0) {
+                downloadTagsByScheme(remainingSchemes.shift(), remainingSchemes, finalCallback);
+            } else {
 
 
-				finalCallback();
-				            console.log(schemeConceptsMap)
+                finalCallback();
+                console.log(schemeConceptsMap)
                 console.log(tagMap)
                 console.log(schemeConceptsArray)
 
-			}
+            }
         }
     })
 
+}
+
+function readFileContent(file) {
+    const reader = new FileReader()
+    return new Promise((resolve, reject) => {
+        reader.onload = event => resolve(event.target.result)
+        reader.onerror = error => reject(error)
+        reader.readAsText(file)
+    })
+}
+
+function placeFileContent(target, file) {
+    readFileContent(file).then(content => {
+        console.log(target)
+        console.log(content)
+        //$('#java-content').text(content);
+        //$('#java-content').parent().remove("prettyprinted");
+        var pre = document.createElement('pre');
+        var code = document.createElement('code')
+
+        pre.className = "prettyprint prettyprinted";
+        code.className='language-java'
+        code.innerHTML = PR.prettyPrintOne(content, 'java', true);
+        pre.appendChild(code)
+        $('#javaView').append(pre);
+        //$("#container").append('<pre class="prettyprint"><code id="java-content" class="language-java" >content</code></pre>')
+
+        prettyPrint()
+    }).catch(error => console.log(error))
 }
 

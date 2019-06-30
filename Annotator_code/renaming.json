@@ -1,0 +1,561 @@
+{
+  "java": [
+    {
+      "concept": "java:Node",
+      "ide": "ASTNode"
+    },
+    {
+      "concept": "java:AbstractType",
+      "ide": "AbstractTypeDeclaration"
+    },
+    {
+      "concept": "java:Annotatable",
+      "ide": "AnnotatableType"
+    },
+    {
+      "concept": "java:AnonymousClass",
+      "ide": "AnonymousClassDeclaration"
+    },
+    {
+      "concept": "java:StaticArrayInitialization",
+      "ide": "ArrayInitializer"
+    },
+    {
+      "concept": "java:Assertion",
+      "ide": "AssertStatement"
+    },
+    {
+      "concept": "java:Boolean",
+      "ide": "BooleanLiteral"
+    },
+    {
+      "concept": "java:Break",
+      "ide": "BreakStatement"
+    },
+    {
+      "concept": "java:Casting",
+      "ide": "CastExpression"
+    },
+    {
+      "concept": "java:Catch",
+      "ide": "CatchClause"
+    },
+    {
+      "concept": "java:Character",
+      "ide": "CharacterLiteral"
+    },
+    {
+      "concept": "java:Instantiation",
+      "ide": "ClassInstanceCreation"
+    },
+    {
+      "concept": "java:ConditionalOperator",
+      "ide": "ConditionalExpression"
+    },
+    {
+      "concept": "java:Continue",
+      "ide": "ContinueStatement"
+    },
+    {
+      "concept": "java:ArraySubscriptOperator",
+      "ide": "Dimension"
+    },
+    {
+      "concept": "java:DoWhileLoop",
+      "ide": "DoStatement"
+    },
+    {
+      "concept": "java:EnhancedForLoop",
+      "ide": "EnhancedForStatement"
+    },
+    {
+      "concept": "java:EnumConstant",
+      "ide": "EnumConstantDeclaration"
+    },
+    {
+      "concept": "java:Enum",
+      "ide": "EnumDeclaration"
+    },
+    {
+      "concept": "java:Attribute",
+      "ide": "FieldAccess"
+    },
+    {
+      "concept": "java:AttributeDeclaration",
+      "ide": "FieldDeclaration"
+    },
+    {
+      "concept": "java:ForLoop",
+      "ide": "ForStatement"
+    },
+    {
+      "concept": "java:If",
+      "ide": "IfStatement"
+    },
+    {
+      "concept": "java:Import",
+      "ide": "ImportDeclaration"
+    },
+    {
+      "ide": "InfixExpression"
+    },
+    {
+      "concept": "java:StaticInitialization",
+      "ide": "Initializer"
+    },
+    {
+      "concept": "java:Instanceof",
+      "ide": "InstanceofExpression"
+    },
+    {
+      "concept": "java:Invocation",
+      "ide": "MethodInvocation"
+    },
+    {
+      "concept": "java:Null",
+      "ide": "NullLiteral"
+    },
+    {
+      "concept": "java:Number",
+      "ide": "NumberLiteral"
+    },
+    {
+      "concept": "java:Package",
+      "ide": "PackageDeclaration"
+    },
+    {
+      "concept": "java:GenericType",
+      "ide": "ParameterizedType"
+    },
+    {
+      "concept": "java:Parentheses",
+      "ide": "ParenthesizedExpression"
+    },
+    {
+      "concept": "java:Postfix",
+      "ide": "PostfixExpression"
+    },
+    {
+      "concept": "java:Prefix",
+      "ide": "PrefixExpression"
+    },
+    {
+      "concept": "java:Return",
+      "ide": "ReturnStatement"
+    },
+    {
+      "concept": "java:ReferenceType",
+      "ide": "SimpleType"
+    },
+    {
+      "concept": "java:Parameter",
+      "ide": "SingleVariableDeclaration"
+    },
+    {
+      "concept": "java:String",
+      "ide": "StringLiteral"
+    },
+    {
+      "concept": "java:SuperClassAttribute",
+      "ide": "SuperFieldAccess"
+    },
+    {
+      "concept": "java:SuperClassMethodInvocation",
+      "ide": "SuperMethodInvocation"
+    },
+    {
+      "concept": "java:SuperClassMethodReference",
+      "ide": "SuperMethodReference"
+    },
+    {
+      "concept": "java:Switch",
+      "ide": "SwitchStatement"
+    },
+    {
+      "concept": "java:Synchronized",
+      "ide": "SynchronizedStatement"
+    },
+    {
+      "concept": "java:This",
+      "ide": "ThisExpression"
+    },
+    {
+      "concept": "java:Throw",
+      "ide": "ThrowStatement"
+    },
+    {
+      "concept": "java:Try",
+      "ide": "TryStatement"
+    },
+    {
+      "concept": "java:ReferenceTypeDeclaration",
+      "ide": "TypeDeclaration"
+    },
+    {
+      "concept": "java:MetaType",
+      "ide": "TypeLiteral"
+    },
+    {
+      "concept": "java:GenericParameter",
+      "ide": "TypeParameter"
+    },
+    {
+      "concept": "java:Variable",
+      "ide": "VariableDeclaration"
+    },
+    {
+      "concept": "java:ExpressionList",
+      "ide": "VariableDeclarationExpression"
+    },
+    {
+      "concept": "java:VariableInitialization",
+      "ide": "VariableDeclarationFragment"
+    },
+    {
+      "concept": "java:VariableDeclaration",
+      "ide": "VariableDeclarationStatement"
+    },
+    {
+      "concept": "java:WhileLoop",
+      "ide": "WhileStatement"
+    },
+    {
+      "concept": "java:GenericWildcard",
+      "ide": "WildcardType"
+    },
+    {
+      "concept": "java:Equality",
+      "ide": "equals"
+    }
+  ],
+  "c": [
+    {
+      "concept": "c:ArrayType",
+      "ide": "IASTArrayDeclarator"
+    },
+    {
+      "concept": "c:ArrayModifier",
+      "ide": "IASTArrayModifier"
+    },
+    {
+      "concept": "c:ArrayAccess",
+      "ide": "IASTArraySubscriptExpression"
+    },
+    {
+      "concept": "c:AttributeOwner",
+      "ide": "IASTAttributeOwner"
+    },
+    {
+      "concept": "c:BinaryExpression",
+      "ide": "IASTBinaryExpression"
+    },
+    {
+      "concept": "c:BinaryTypeIdExpression",
+      "ide": "IASTBinaryTypeIdExpression"
+    },
+    {
+      "concept": "c:Break",
+      "ide": "IASTBreakStatement"
+    },
+    {
+      "concept": "c:SwitchCase",
+      "ide": "IASTCaseStatement"
+    },
+    {
+      "concept": "c:Casting",
+      "ide": "IASTCastExpression"
+    },
+    {
+      "concept": "c:Comment",
+      "ide": "IASTComment"
+    },
+    {
+      "concept": "c:CompositeTypeSpecifier",
+      "ide": "IASTCompositeTypeSpecifier"
+    },
+    {
+      "concept": "c:Block",
+      "ide": "IASTCompoundStatement"
+    },
+    {
+      "concept": "c:ConditionalOperator",
+      "ide": "IASTConditionalExpression"
+    },
+    {
+      "concept": "c:Continue",
+      "ide": "IASTContinueStatement"
+    },
+    {
+      "concept": "c:DeclarationSpecifier",
+      "ide": "IASTDeclSpecifier"
+    },
+    {
+      "concept": "c:Declaration",
+      "ide": "IASTDeclaration"
+    },
+    {
+      "concept": "c:DeclarationStatement",
+      "ide": "IASTDeclarationStatement"
+    },
+    {
+      "concept": "c:Declarator",
+      "ide": "IASTDeclarator"
+    },
+    {
+      "concept": "c:SwitchDefault",
+      "ide": "IASTDefaultStatement"
+    },
+    {
+      "concept": "c:DoWhileLoop",
+      "ide": "IASTDoStatement"
+    },
+    {
+      "concept": "c:ElaboratedTypeSpecifier",
+      "ide": "IASTElaboratedTypeSpecifier"
+    },
+    {
+      "concept": "c:Enum",
+      "ide": "IASTEnumerationSpecifier"
+    },
+    {
+      "concept": "c:EnumConstant",
+      "ide": "IASTEnumerator"
+    },
+    {
+      "concept": "c:EqualsInitializer",
+      "ide": "IASTEqualsInitializer"
+    },
+    {
+      "concept": "c:Expression",
+      "ide": "IASTExpression"
+    },
+    {
+      "concept": "c:ExpressionList",
+      "ide": "IASTExpressionList"
+    },
+    {
+      "concept": "c:ExpressionStatement",
+      "ide": "IASTExpressionStatement"
+    },
+    {
+      "concept": "c:FieldDeclarator",
+      "ide": "IASTFieldDeclarator"
+    },
+    {
+      "concept": "c:StructFieldAccess",
+      "ide": "IASTFieldReference"
+    },
+    {
+      "concept": "c:ForLoop",
+      "ide": "IASTForStatement"
+    },
+    {
+      "concept": "c:Invocation",
+      "ide": "IASTFunctionCallExpression"
+    },
+    {
+      "concept": "c:FunctionDeclarator",
+      "ide": "IASTFunctionDeclarator"
+    },
+    {
+      "concept": "c:FunctionDefinition",
+      "ide": "IASTFunctionDefinition"
+    },
+    {
+      "concept": "c:FunctionStyleMacroParameter",
+      "ide": "IASTFunctionStyleMacroParameter"
+    },
+    {
+      "concept": "c:Goto",
+      "ide": "IASTGotoStatement"
+    },
+    {
+      "concept": "c:IdExpression",
+      "ide": "IASTIdExpression"
+    },
+    {
+      "concept": "c:If",
+      "ide": "IASTIfStatement"
+    },
+    {
+      "concept": "c:Initializer",
+      "ide": "IASTInitializer"
+    },
+    {
+      "concept": "c:InitializerClause",
+      "ide": "IASTInitializerClause"
+    },
+    {
+      "concept": "c:VariableInitialization",
+      "ide": "IASTInitializerExpression"
+    },
+    {
+      "concept": "c:StaticArrayInitialization",
+      "ide": "IASTInitializerList"
+    },
+    {
+      "concept": "c:LabeledStatement",
+      "ide": "IASTLabelStatement"
+    },
+    {
+      "concept": "c:Literal",
+      "ide": "IASTLiteralExpression"
+    },
+    {
+      "concept": "c:Name",
+      "ide": "IASTName"
+    },
+    {
+      "concept": "c:Node",
+      "ide": "IASTNode"
+    },
+    {
+      "concept": "c:EmptyStatement",
+      "ide": "IASTNullStatement"
+    },
+    {
+      "concept": "c:ParameterDeclaration",
+      "ide": "IASTParameterDeclaration"
+    },
+    {
+      "concept": "c:Pointer",
+      "ide": "IASTPointer"
+    },
+    {
+      "concept": "c:PointerOperator",
+      "ide": "IASTPointerOperator"
+    },
+    {
+      "concept": "c:PreprocessorElif",
+      "ide": "IASTPreprocessorElifStatement"
+    },
+    {
+      "concept": "c:PreprocessorElse",
+      "ide": "IASTPreprocessorElseStatement"
+    },
+    {
+      "concept": "c:PreprocessorEndif",
+      "ide": "IASTPreprocessorEndifStatement"
+    },
+    {
+      "concept": "c:PreprocessorError",
+      "ide": "IASTPreprocessorErrorStatement"
+    },
+    {
+      "concept": "c:PreprocessorFunctionStyleMacro",
+      "ide": "IASTPreprocessorFunctionStyleMacroDefinition"
+    },
+    {
+      "concept": "c:PreprocessorIf",
+      "ide": "IASTPreprocessorIfStatement"
+    },
+    {
+      "concept": "c:PreprocessorIfdef",
+      "ide": "IASTPreprocessorIfdefStatement"
+    },
+    {
+      "concept": "c:PreprocessorIfndef",
+      "ide": "IASTPreprocessorIfndefStatement"
+    },
+    {
+      "concept": "c:PreprocessorInclude",
+      "ide": "IASTPreprocessorIncludeStatement"
+    },
+    {
+      "concept": "c:PreprocessorMacroDefinition",
+      "ide": "IASTPreprocessorMacroDefinition"
+    },
+    {
+      "concept": "c:PreprocessorMacroExpansion",
+      "ide": "IASTPreprocessorMacroExpansion"
+    },
+    {
+      "concept": "c:PreprocessorObjectStyleMacro",
+      "ide": "IASTPreprocessorObjectStyleMacroDefinition"
+    },
+    {
+      "concept": "c:PreprocessorPragma",
+      "ide": "IASTPreprocessorPragmaStatement"
+    },
+    {
+      "concept": "c:Preprocessor",
+      "ide": "IASTPreprocessorStatement"
+    },
+    {
+      "concept": "c:PreprocessorUndef",
+      "ide": "IASTPreprocessorUndefStatement"
+    },
+    {
+      "concept": "c:Return",
+      "ide": "IASTReturnStatement"
+    },
+    {
+      "concept": "c:PrimitiveType",
+      "ide": "IASTSimpleDeclSpecifier"
+    },
+    {
+      "concept": "c:VariableDeclaration",
+      "ide": "IASTSimpleDeclaration"
+    },
+    {
+      "concept": "c:StandardFunctionDeclarator",
+      "ide": "IASTStandardFunctionDeclarator"
+    },
+    {
+      "concept": "c:Statement",
+      "ide": "IASTStatement"
+    },
+    {
+      "concept": "c:Switch",
+      "ide": "IASTSwitchStatement"
+    },
+    {
+      "concept": "c:Token",
+      "ide": "IASTToken"
+    },
+    {
+      "concept": "c:TokenList",
+      "ide": "IASTTokenList"
+    },
+    {
+      "concept": "c:TypeIdExpression",
+      "ide": "IASTTypeIdExpression"
+    },
+    {
+      "concept": "c:TypeIdInitializerExpression",
+      "ide": "IASTTypeIdInitializerExpression"
+    },
+    {
+      "concept": "c:UnaryExpression",
+      "ide": "IASTUnaryExpression"
+    },
+    {
+      "concept": "c:WhileLoop",
+      "ide": "IASTWhileStatement"
+    },
+    {
+      "concept": "c:ArrayDesignator",
+      "ide": "ICASTArrayDesignator"
+    },
+    {
+      "concept": "c:ArraySubscriptOperator",
+      "ide": "ICASTArrayModifier"
+    },
+    {
+      "concept": "c:ReferenceTypeDeclaration",
+      "ide": "ICASTCompositeTypeSpecifier"
+    },
+    {
+      "concept": "c:DesignatedInitializer",
+      "ide": "ICASTDesignatedInitializer"
+    },
+    {
+      "concept": "c:FieldDesignator",
+      "ide": "ICASTFieldDesignator"
+    },
+    {
+      "concept": "c:ReferenceType",
+      "ide": "ICASTTypedefNameSpecifier"
+    }
+  ]
+}

@@ -58,10 +58,14 @@ class PageAnnotation(Annotation):
 
 
 class VideoAnnotation(Annotation):
+    video = models.ForeignKey(Video, on_delete=models.CASCADE,null=True)
+
     timestamp = models.PositiveIntegerField()
 
 
 class CodeAnnotation(Annotation):
+    cs = models.ForeignKey(CodeSnippet, on_delete=models.CASCADE,null=True)
+
     line = models.PositiveIntegerField()
 
 class Link(models.Model):

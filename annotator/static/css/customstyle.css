@@ -5,7 +5,7 @@
 
 .leftside{
     background-color: #111;
-    overflow: hidden;
+    overflow: auto;
 
 }
 .rightside{
@@ -46,6 +46,7 @@ body{
 
 .pdfContainer {
     text-align: center;
+
 }
 
 .pdfPlaceholder {

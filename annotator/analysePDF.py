@@ -41,10 +41,10 @@ def ocrTextExraction(f):
             for page in pages:
                 page_counter = page_counter + 1
 
-                imageFilename = str(tempImageDir) +"page_" + str(page_counter) + ".jpg"
+                imageFilename = str(tempImageDir) +"page_" + str(page_counter).zfill(3) + ".jpg"
                 page.save(imageFilename,'JPEG')
 
-                textFileName = str(folder) +"text_page_" + str(page_counter) +"_"+str(f.id)+ ".txt"
+                textFileName = str(folder) +"text_page_" + str(page_counter).zfill(3) +"_"+str(f.id)+ ".txt"
                 if not os.path.exists(textFileName):
                     tf = open(textFileName,'w')
                     text= str(((pytesseract.image_to_string(Image.open(imageFilename)))))

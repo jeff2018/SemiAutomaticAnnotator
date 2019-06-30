@@ -2,7 +2,7 @@ from .models import *
 import os
 from .graph import graph
 from .annotation import spotlight,babelfy
-from django.forms.models import model_to_dict
+from .codeAnnotation import execute_java,AnnotatorMain
 
 
 
@@ -15,7 +15,33 @@ def saveResource(file,destination):
         else:
             resource = PDF(name=file,filepath=destination,nbrOfPages=1)
             resource.save()
+
+    if file.endswith('.java') or file.endswith('.c'):
+        print("file is a codesnippet")
+        cs_exist = CodeSnippet.objects.filter(name=file).exists()
+        if cs_exist:
+            resource = CodeSnippet.objects.get(name=file)
+        else:
+            resource = CodeSnippet(name=file,filepath=destination,lines=1)
+            resource.save()
+
+
     return resource
+
+
+def processCS(file):
+    annotations_exist = CodeAnnotation.objects.filter(cs_id=file.id).exists()
+    if not annotations_exist:
+        filepath = file.filepath
+        print(filepath)
+        args=[]
+        args.append(filepath)
+        concept_string=execute_java(AnnotatorMain,args)
+        print(concept_string)
+
+
+    return
+
 
 def retrieveAnnotations(file):
     if file:
@@ -29,6 +55,7 @@ def retrieveAnnotations(file):
             annotations_exist = PageAnnotation.objects.filter(pdf_id = file.id).exists()
             if not annotations_exist:
                 textfolder = file.textfolder
+                print(textfolder)
                 page_counter = 1
                 fileList = os.listdir(textfolder)
                 fileList.sort()
@@ -74,7 +101,7 @@ def retrieveAnnotations(file):
             d['pages']=[]
             d['frequency']=[]
             degree=0
-            print(d)
+
             concept_id = d['id']
             page_annot = PageAnnotation.objects.filter(pdf_id=file.id,concept_id=concept_id)
             for p in page_annot:
@@ -84,10 +111,10 @@ def retrieveAnnotations(file):
             d['value'] = len(d['pages'])
             d['avgDegree'] = degree / d['value']
             d['words'] = []
-
+            print(d)
         for dl in dict_links:
             dl['distance']=10
-        combined_dict = {"nodes":list(dict),"links":list(dict_links)}
+        combined_dict = {"nodes":list(dict),"links":list(dict_links),"pages":file.nbrOfPages}
 
         return combined_dict
 
@@ -132,8 +159,10 @@ def analysis(text):
                 print("s ", s)
                 if s['label'] in newSources:
                     t['frequency'] += s['frequency']
-            avgFreg = int(round(t['frequency'] / len(t['sources'])))
-            t['frequency'] = avgFreg
+            if len(t['sources']) != 0:
+
+                avgFreg = int(round(t['frequency'] / len(t['sources'])))
+                t['frequency'] = avgFreg
         results.append(t)
         # print(t)
     return results
