@@ -10,7 +10,9 @@ var pdfPath = null,
 
 var container = document.getElementsByClassName("pdfContainer");
 
-var schemeConceptsMap = {}
+var schemeConceptsMap = {},
+    tagMap={},
+	schemeConceptsArray = [];
 
 const almaBaseURL = 'https://alma.uni.lu'
 
@@ -185,6 +187,16 @@ function onNextPage() {
 
 
 $(function () {
+
+    $('#addAnnotationsButton').click(function (e) {
+    //console.log("keydown",e)
+    var text =$("#schemeList option-select").text()
+    var conceptName =$("#concepts option-select").text()
+
+    console.log(text)
+    console.log(conceptName)
+
+})
     // PDF controls
     $("#prevPage").click(onPrevPage);
     $("#nextPage").click(onNextPage);
@@ -405,45 +417,62 @@ function ontologyReset() {
 }
 
 function downloadSchemes(callback) {
-	request(almaBaseURL + '/api/schemes/', function (error, response, body) {
+    $.ajax({
+        url: almaBaseURL+'/api/schemes/',
+        type:"GET",
+        dataType:"json",
+        success:function(response){
+            var data = response
+            //console.log(data)
+            downloadTagsByScheme(data.shift(),data,callback)
+
+        },
+
+    })
+
+	/*request(almaBaseURL + '/api/schemes/', function (error, response, body) {
 		if(!error) {
 			data = JSON.parse(body);
 			//$("#addAnnotationsButton").prop('disabled', true);
 			downloadTagsByScheme(data.shift(), data, callback);
 		}
-	});
+	});*/
 
 }
 function downloadTagsByScheme(scheme, remainingSchemes, finalCallback) {
-	request(almaBaseURL + "/api/schemes/" + scheme.uri + "/", function (error, response, body) {
-		if(!error) {
-			data = JSON.parse(body);
 
-			$("#schemeList").append($('<option value="' + scheme.uri + '">' + scheme.title + '</option>'));
+    $.ajax({
+        url: almaBaseURL + '/api/schemes/' + scheme.uri+'/',
+        type:"GET",
+        dataType:"json",
+        success:function(data){
+            //console.log(data)ß
+            schemeConceptsMap[scheme.uri]={'title':scheme.title,'concepts':[]}
+            var map ={'title':scheme.title,'concepts':[],'uri':scheme.uri}
+            for (var i = 0; i< data.length; i++){
+                var concept = data[i]
+                if(concept.label.length> 0){
+                    var c = { 'label': concept.label, 'scheme': scheme.title };
+					tagMap[concept.uri] = c;
 
-			schemeConceptsMap[scheme.uri] = { 'title': scheme.title, 'concepts': [] };
-
-			for(var i = 0; i < data.length; i++) {
-				var concept = data[i];
-
-				if(concept.label.length > 0) {
-					schemeConceptsMap[scheme.uri].concepts.push(concept.uri);
-				}
-			}
-
-			if(remainingSchemes.length > 0) {
+                    schemeConceptsMap[scheme.uri].concepts.push(concept.uri)
+                    map.concepts.push(concept.uri)
+                }
+            }
+            schemeConceptsArray.push(map)
+            if(remainingSchemes.length > 0) {
 				downloadTagsByScheme(remainingSchemes.shift(), remainingSchemes, finalCallback);
 			} else {
-				$("#schemeList").selectpicker('refresh').on('changed.bs.select', function (e) {
-					var selectedSchemes = $("#schemeList").val();
-
-
-				});
 
 
 				finalCallback();
+				            console.log(schemeConceptsMap)
+                console.log(tagMap)
+                console.log(schemeConceptsArray)
+
 			}
-		}
-	});
+        }
+    })
+
 }
 

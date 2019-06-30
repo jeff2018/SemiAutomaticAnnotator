@@ -71,7 +71,7 @@ function highlightConcepts(pageNum) {
 }
 
 async function highlightWords(d) {
-    var interval = setInterval(function() {
+    /*var interval = setInterval(function() {
         if (text_layer= document.getElementById('text-layer')) {
             clearInterval(interval);
             //console.log(text_layer);
@@ -95,7 +95,7 @@ async function highlightWords(d) {
                 }
             }
         }
-    }, 100);
+    }, 100);*/
 
 
     /*var span = document.getElementsByClassName("highlight "+d.index)
@@ -131,5 +131,23 @@ function removeHighlightWords(d) {
 
 
 }
+function fillSelecters(){
+    schemeConceptsArray.forEach(function(scheme){
+        $("#schemeList").append($('<option value="' + scheme.uri + '">' + scheme.title + '</option>'));
+
+        var optgroup = $('<optgroup data-uri="' + scheme.uri + '" label="' + scheme.title + '">');
+
+        scheme.concepts.forEach(function(conceptURI) {
+            var concept = tagMap[conceptURI];
+
+
+            optgroup.append($('<option value="' + conceptURI + '" data-scheme="' + concept.scheme + '">' + concept.label + '</option>'));
+        });
+        $("#concepts").append(optgroup);
+
+    })
+
+}
+
 
 
