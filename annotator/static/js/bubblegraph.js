@@ -296,26 +296,6 @@ function drawBubbleGraph(data) {
         })
         .style("text-anchor", "middle")
         .attr("class", "bubbleImage")
-        .attr('width', function (d) {
-
-                return 40
-            }
-        )
-        .attr('height', function (d) {
-
-                return 40
-            }
-        )
-        .attr("x", function (d) {
-
-            return -d.radius / 2
-        })
-
-        .attr("y", function (d) {
-
-                return d.radius / 2 - d.radius * 0.5
-            }
-        )
         .style("visibility", "hidden")
         .attr("xlink:href", function (d) {
 
@@ -410,6 +390,26 @@ function drawBubbleGraph(data) {
                         if (focusNode.edited) {
                             let image = d3.selectAll("#i1_" + focusNode.id)
                             image.style("visibility", "visible")
+                                .attr('width', function (d) {
+
+                                        return focusNode.r
+                                    }
+                                )
+                                .attr('height', function (d) {
+
+                                        return focusNode.r
+                                    }
+                                )
+                                .attr("x", function (d) {
+
+                                    return -focusNode.r / 2
+                                })
+
+                                .attr("y", function (d) {
+
+                                        return focusNode.r / 2 - d.r * 0.5
+                                    }
+                                )
 
                         }
                         focusNode = null;
@@ -536,26 +536,6 @@ function drawBubbleGraph(data) {
             })
             .style("text-anchor", "middle")
             .attr("class", "bubbleImage")
-            .attr('width', function (d) {
-
-                    return 40
-                }
-            )
-            .attr('height', function (d) {
-
-                    return 40
-                }
-            )
-            .attr("x", function (d) {
-
-                return -d.radius / 2
-            })
-
-            .attr("y", function (d) {
-
-                    return d.radius / 2 - d.radius * 0.5
-                }
-            )
             .style("visibility", "hidden")
             .attr("xlink:href", function (d) {
 
@@ -734,6 +714,26 @@ function drawBubbleGraph(data) {
                             let image = d3.selectAll("#i1_" + lastNode.id)
                             console.log(image)
                             image.style("visibility", "visible")
+                                .attr('width', function (d) {
+
+                                        return lastNode.r
+                                    }
+                                )
+                                .attr('height', function (d) {
+
+                                        return lastNode.r
+                                    }
+                                )
+                                .attr("x", function (d) {
+
+                                    return -lastNode.r / 2
+                                })
+
+                                .attr("y", function (d) {
+
+                                        return lastNode.r / 2 - lastNode.r * 0.5
+                                    }
+                                )
 
                         }
 
@@ -1115,6 +1115,26 @@ function drawBubbleGraph(data) {
             if (focusNode.edited) {
                 let image = d3.selectAll("#i1_" + focusNode.id)
                 image.style("visibility", "visible")
+                    .attr('width', function (d) {
+
+                            return focusNode.r
+                        }
+                    )
+                    .attr('height', function (d) {
+
+                            return focusNode.r
+                        }
+                    )
+                    .attr("x", function (d) {
+
+                        return -focusNode.r / 2
+                    })
+
+                    .attr("y", function (d) {
+
+                            return focusNode.r / 2 - focusNode.r * 0.5
+                        }
+                    )
 
             }
             focusNode.name = conceptName
