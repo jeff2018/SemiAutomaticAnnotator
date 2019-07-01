@@ -1,5 +1,6 @@
 from .models import *
 import os
+import json
 from .graph import graph
 from .annotation import spotlight,babelfy
 from .codeAnnotation import execute_java,AnnotatorMain
@@ -36,11 +37,52 @@ def processCS(file):
         print(filepath)
         args=[]
         args.append(filepath)
-        concept_string=execute_java(AnnotatorMain,args)
-        print(concept_string)
+        conceptsCS=execute_java(AnnotatorMain,args)
+        print(conceptsCS)
+        jsonFile = open('/Users/jeff/PycharmProjects/SAAnnotator/annotator/sequence_scrapbook.json')
+        sequenceArray = json.load(jsonFile)
+        sequence=[]
+        conceptsCSList = json.loads(conceptsCS)
+        if file.name.endswith(".java"):
+            sequence=sequenceArray[1]['java']
+        else:
+            sequence = sequenceArray[0]['c']
+
+        remainingList=[]
+        for cpt in conceptsCSList:
+
+            uri = cpt['uri']
+            lines=cpt['lines']
+            for index, seq_uri in enumerate(sequence):
+                if uri == seq_uri:
+                    print(uri,lines,index)
+                    cpt['degree']=index
+                    remainingList.append(cpt)
+        sortedRemainingList = sorted(remainingList,key=lambda k:k['degree'],reverse=True)
+        for index, concept_srl in enumerate(sortedRemainingList):
+            concept_srl['degree']=index+1
+        print(sortedRemainingList)
+
+        for concept_cs in sortedRemainingList:
+            uri = concept_cs['uri']
+            lines = concept_cs['lines']
+            degree = concept_cs['degree']
+
+            concept_exist = Concept.objects.filter(uri=uri).exists()
+            if not concept_exist:
+                concept = Concept(uri=uri, label=uriToLabel(uri), group="1")
+                concept.save()
+            else:
+                concept = Concept.objects.get(uri=uri)
+            ca= CodeAnnotation(sequenceRank=degree,frequency=len(lines),concept_id=concept.id,cs_id=file.id)
+            ca.save()
+            for line in lines:
+                line_exist = LineOfCode.objects.filter(lineNumber=line,codeAnnotation_id=ca.id)
+                if not line_exist:
+                    new_line = LineOfCode(lineNumber=line,codeAnnotation_id=ca.id)
+                    new_line.save()
 
 
-    return
 
 
 def retrieveAnnotations(file):
@@ -91,32 +133,53 @@ def retrieveAnnotations(file):
 
                     page_counter=page_counter+1
 
-        annotations = PageAnnotation.objects.filter(pdf_id=file.id).values('concept_id').distinct()
-        cs = Concept.objects.filter(id__in=annotations).values()
+            annotations = PageAnnotation.objects.filter(pdf_id=file.id).values('concept_id').distinct()
+            cs = Concept.objects.filter(id__in=annotations).values()
 
-        links = LinkPDFAnnotation.objects.filter(pdf_id=file.id).values()
-        dict = cs
-        dict_links = links
-        for d in dict:
-            d['pages']=[]
-            d['frequency']=[]
-            degree=0
+            links = LinkPDFAnnotation.objects.filter(pdf_id=file.id).values()
+            dict = cs
+            dict_links = links
+            for d in dict:
+                d['pages']=[]
+                d['frequency']=[]
+                degree=0
 
-            concept_id = d['id']
-            page_annot = PageAnnotation.objects.filter(pdf_id=file.id,concept_id=concept_id)
-            for p in page_annot:
-                d['pages'].append(str("Page "+str(p.page)))
-                degree +=p.degree
-                d['frequency'].append(p.frequency)
-            d['value'] = len(d['pages'])
-            d['avgDegree'] = degree / d['value']
-            d['words'] = []
-            print(d)
-        for dl in dict_links:
-            dl['distance']=10
-        combined_dict = {"nodes":list(dict),"links":list(dict_links),"pages":file.nbrOfPages}
+                concept_id = d['id']
+                page_annot = PageAnnotation.objects.filter(pdf_id=file.id,concept_id=concept_id)
+                for p in page_annot:
+                    d['pages'].append(str("Page "+str(p.page)))
+                    degree +=p.degree
+                    d['frequency'].append(p.frequency)
+                d['value'] = len(d['pages'])
+                d['avgDegree'] = degree / d['value']
+                d['words'] = []
+                print(d)
+            for dl in dict_links:
+                dl['distance']=10
+            combined_dict = {"nodes":list(dict),"links":list(dict_links),"pages":file.nbrOfPages,"filename": file.name, "id": file.id}
 
-        return combined_dict
+            return combined_dict
+
+
+        if myFileExt.lower() =='.java' or myFileExt.lower() =='.c':
+            annotations = CodeAnnotation.objects.filter(cs_id=file.id).values('concept_id').distinct()
+            cs = Concept.objects.filter(id__in=annotations).values()
+
+            dict = cs
+            for d in dict:
+                d['lines'] = []
+                print(d['id'])
+                print(d)
+                ca = CodeAnnotation.objects.get(concept_id=d['id'], cs_id=file.id)
+                d['sequenceRank'] = ca.sequenceRank
+                lines = LineOfCode.objects.filter(codeAnnotation=ca.id)
+                for line in lines:
+                    d['lines'].append(line.lineNumber)
+
+            combined_dict = {"nodes": list(dict),"filename": file.name, "id": file.id}
+            print(combined_dict)
+            return combined_dict
+
 
 
 def uriToLabel(uri):

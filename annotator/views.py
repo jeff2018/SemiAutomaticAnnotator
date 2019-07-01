@@ -66,6 +66,9 @@ def processFile(request):
             f = CodeSnippet.objects.get(id=fileid)
             if f:
                 processCS(f)
+            res = {"message": "Processed " + str(f.name), "path": f.filepath, "filename": f.name, "id": f.id}
+
+            return JsonResponse(res)
 
 
     return render(request,'annotator/index.html')
@@ -75,8 +78,18 @@ def processTxtFile(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         fileid = data['id']
-        file = PDF.objects.get(id=fileid)
-        res = retrieveAnnotations(file)
+        filename = data['name']
 
-        return JsonResponse(res)
+        if filename.endswith('.pdf'):
+            file = PDF.objects.get(id=fileid)
+
+            res = retrieveAnnotations(file)
+            return JsonResponse(res)
+
+        if filename.endswith('.java') or filename.endswith('.c'):
+            file = CodeSnippet.objects.get(id=fileid)
+            res = retrieveAnnotations(file)
+
+
+            return JsonResponse(res)
 

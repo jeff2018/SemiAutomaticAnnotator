@@ -16,6 +16,7 @@ jobs = "org.eclipse.core.jobs_3.9.3.v20180115-1757.jar"
 osgi = "org.eclipse.osgi_3.12.100.v20180210-1608.jar"
 gson = "com.google.gson_2.7.0.v20170129-0911.jar"
 apache_common ="org.apache.commons.io_2.2.0.v201405211200.jar"
+json_simple = "json-simple-1.1.jar"
 
 treeobject = "Java_Files/AST_Test/src/model/TreeObject.java"
 treeparent = "Java_Files/AST_Test/src/model/TreeParent.java"
@@ -34,7 +35,7 @@ filepath = "/Users/jeff/PycharmProjects/AnnotateFiles/Java_Files/test123.c"
 def compile_java(java_filepath):
 
     #try:
-        subprocess.check_call(['javac','-cp',treeobject+":"+treeparent+":"+acfm+":"+acm+":"+plugin+":"+jacp+":"+cacp+":"+avcp+":"+astcontroller+":"+pluginsPath+cdt_core+":"+pluginsPath+jdt_core+":"+pluginsPath+gson+":"+pluginsPath+runtime+":"+pluginsPath+resources+":"+pluginsPath+contenttype+":"+pluginsPath+jobs+":"+pluginsPath+equinox_common+":"+pluginsPath+emf_common+":"+pluginsPath+equinox_pref+":"+pluginsPath+osgi+":"+pluginsPath+apache_common, java_filepath])
+        subprocess.check_call(['javac','-cp',treeobject+":"+treeparent+":"+acfm+":"+acm+":"+plugin+":"+jacp+":"+cacp+":"+avcp+":"+astcontroller+":"+pluginsPath+cdt_core+":"+pluginsPath+jdt_core+":"+pluginsPath+gson+":"+pluginsPath+runtime+":"+pluginsPath+resources+":"+pluginsPath+contenttype+":"+pluginsPath+jobs+":"+pluginsPath+equinox_common+":"+pluginsPath+emf_common+":"+pluginsPath+equinox_pref+":"+pluginsPath+osgi+":"+pluginsPath+apache_common+":"+pluginsPath+json_simple, java_filepath])
     #except subprocess.CalledProcessError as e:
      #   print(e)
 
@@ -47,7 +48,7 @@ def execute_java(java_filepath, args):
     java_class, ext = os.path.splitext(base)
     #print(java_class, ext)
 
-    cmd = ['java', '-cp', classpath+":"+pluginsPath+cdt_core+":"+pluginsPath+jdt_core+":"+pluginsPath+gson+":"+pluginsPath+runtime+":"+pluginsPath+resources+":"+pluginsPath+contenttype+":"+pluginsPath+jobs+":"+pluginsPath+equinox_common+":"+pluginsPath+emf_common+":"+pluginsPath+equinox_pref+":"+pluginsPath+osgi+":"+pluginsPath+apache_common, java_class] + args
+    cmd = ['java', '-cp', classpath+":"+pluginsPath+cdt_core+":"+pluginsPath+jdt_core+":"+pluginsPath+gson+":"+pluginsPath+runtime+":"+pluginsPath+resources+":"+pluginsPath+contenttype+":"+pluginsPath+jobs+":"+pluginsPath+equinox_common+":"+pluginsPath+emf_common+":"+pluginsPath+equinox_pref+":"+pluginsPath+osgi+":"+pluginsPath+apache_common+":"+pluginsPath+json_simple, java_class] + args
 
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True).communicate()[0]
     return proc

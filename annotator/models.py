@@ -41,9 +41,7 @@ class CodeSnippet(Resource):
 class Annotation(models.Model):
     concept = models.ForeignKey(Concept, on_delete=models.CASCADE,null=True)
     #resource = models.ForeignKey('annotator.Resource', on_delete=models.CASCADE)
-    degree = models.FloatField(null=True)
-    pagerank = models.FloatField(null=True)
-    camino = models.NullBooleanField()
+
     frequency = models.PositiveIntegerField(null=True)
 
     class Meta:
@@ -55,18 +53,28 @@ class PageAnnotation(Annotation):
     pdf = models.ForeignKey(PDF, on_delete=models.CASCADE,null=True)
     page = models.PositiveIntegerField()
     filepath = models.CharField(max_length=255,null=True)
+    degree = models.FloatField(null=True)
+    pagerank = models.FloatField(null=True)
+    camino = models.NullBooleanField()
 
 
 class VideoAnnotation(Annotation):
     video = models.ForeignKey(Video, on_delete=models.CASCADE,null=True)
+    degree = models.FloatField(null=True)
+    pagerank = models.FloatField(null=True)
+    camino = models.NullBooleanField()
 
     timestamp = models.PositiveIntegerField()
 
 
 class CodeAnnotation(Annotation):
     cs = models.ForeignKey(CodeSnippet, on_delete=models.CASCADE,null=True)
+    sequenceRank = models.PositiveIntegerField(null=True)
 
-    line = models.PositiveIntegerField()
+
+class LineOfCode(models.Model):
+    lineNumber = models.PositiveIntegerField()
+    codeAnnotation = models.ForeignKey(CodeAnnotation,on_delete=models.CASCADE,null=True)
 
 class Link(models.Model):
     source = models.PositiveIntegerField()

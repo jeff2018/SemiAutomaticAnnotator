@@ -278,7 +278,7 @@ $(function () {
                 $.when(askToProcess(response).then(function successHandler(response) {
                     console.log("Ask to retieve annotations " + filename)
 
-                    retrieveAnnotations(response.id)
+                    retrieveAnnotations(response)
                 }, function errorHandler(response) {
 
                 }))
@@ -361,9 +361,10 @@ function askToProcess(file) {
     })
 }
 
-function retrieveAnnotations(fileid) {
+function retrieveAnnotations(file) {
     var data = {
-        "id": fileid
+        "id": file.id,
+        "name": file.filename
     }
     return $.ajax({
         type: "POST",
@@ -384,11 +385,18 @@ function retrieveAnnotations(fileid) {
             $('.inner-div').show()
             console.log(response)
             console.log(response.responseJSON)
+            var res = response.responseJSON
+            var filename = res.filename
             //initGraph(response.responseJSON)
             //document.getElementById("btn_bubblegraph").click();
-            drawBubbleGraph(response.responseJSON)
+            if(filename.endsWith('.pdf')){
+                drawBubbleGraph(res)
 
-            initg = true
+            }
+            if(filename.endsWith('.java') || filename.endsWith('.c')) {
+
+            }
+
         }
 
     })
