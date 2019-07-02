@@ -1,5 +1,3 @@
-var pageArray = []
-
 var $this = $('.inner-div'); // targeted div
 var offset = $this.offset();
 var width = $this.width();
@@ -61,36 +59,33 @@ function updateStops(data, i) {
 }
 
 
-function drawBubbleGraph(data) {
-
+function drawCSGraph(data) {
+    console.log(data)
     focusNode = null;
 
-    for (var i = 1; i <= data.pages; i++) {
-        pageArray.push("Page " + i)
-    }
 
-    var scaleRadius = d3.scaleLinear().domain([0, pageArray.length]).range([40, 75]);
+    var scaleRadius = d3.scaleLinear().domain([0, data.nodes.length]).range([40, 100]);
     var maxRadiusFocusNode = centerY * 0.75;
 
     //sort the data according to the averagedegree for the ranking
     data.nodes.sort(function (a, b) {
-        return b.avgDegree - a.avgDegree
+        return a.sequenceRank - b.sequenceRank
     })
 
-    console.log(data.pages)
 
-
-    var maxPerFreqArray = data.nodes.map(d => Math.max.apply(null, d.frequency));
+    /*var maxPerFreqArray = data.nodes.map(d => Math.max.apply(null, d.frequency));
     var maxFrequency = Math.max.apply(null, maxPerFreqArray)
     var minPerFreqArray = data.nodes.map(d => Math.min.apply(null, d.frequency));
-    var minFrequency = Math.min.apply(null, minPerFreqArray)
-
+    var minFrequency = Math.min.apply(null, minPerFreqArray)*/
+    var maxFreq = Math.max.apply(Math, data.nodes.map(function (d) {
+        return d.frequency;
+    }))
     var maxID = Math.max.apply(Math, data.nodes.map(function (d) {
         return d.id;
     }))
     console.log(maxID)
 
-    var scaleGradient = d3.scaleLinear().domain([minFrequency, maxFrequency]).range([1, 100])
+    //var scaleGradient = d3.scaleLinear().domain([minFrequency, maxFrequency]).range([1, 100])
 
     let pack = d3.pack()
         .size([width, height])
@@ -100,18 +95,6 @@ function drawBubbleGraph(data) {
     var forceCollide = d3.forceCollide(d => d.r + 2);
 
     var simulation = d3.forceSimulation()
-        .force("link",
-            d3.forceLink().id(function (d) {
-                return d.id;
-            })
-                .distance(function (d) {
-                    //console.log(scaleRadius(d.source.nbrPages/2 ) + scaleRadius(d.target.nbrPages/2 ))
-                    return (2 * scaleRadius(d.source.nbrPages)) + (2 * scaleRadius(d.target.nbrPages));
-                })
-                .strength(function (d) {
-                    return 0.75;
-                })
-        )
         .force("charge", d3.forceManyBody().strength(-100))
         //.force("collide", forceCollide)
         .force('x', d3.forceX(centerX).strength(strength))
@@ -135,88 +118,30 @@ function drawBubbleGraph(data) {
             radius: nodes.r,
             name: data.label,
             uri: data.uri,
-            nbrPages: data.pages.length,
-            pages: data.pages,
+            nbrlines: data.lines.length,
+            lines: data.lines,
             frequency: data.frequency,
             id: data.id,
-            degree: data.avgDegree,
+            sequenceRank: data.sequenceRank,
             edited: false
 
         }
     });
     //separated dataset for the forcesimulation which is needed for the slider
-    data.links.forEach(function (d, i) {
-        d.index = i
-    })
+
     var forcenodedata = nodesData.map(function (node, i) {
         return node;
     })
-    var forcelinkdata = data.links.map(function (link, i) {
-        return link;
-    })
+
     console.log(nodesData)
     nodesData.forEach(function (node, i) {
         node.rank = i + 1
 
-        node.associatedLinks = data.links.filter(function (link, j) {
 
-            return link.source == node.id || link.target == node.id;
-        })
     })
 
-    nodesData.forEach(function (node, i) {
 
-        node.associatedNodes = []
-        node.associatedLinks.forEach(function (link, j) {
-            if (link.source !== node.id) {
-                node.associatedNodes.push(nodesData.find(x => x.id === link.source))
-            }
-            else {
-                node.associatedNodes.push(nodesData.find(x => x.id === link.target))
-            }
-        })
-    })
-    console.log(data.links)
     simulation.nodes(forcenodedata).on("tick", ticked);
-    simulation.force("link").links(forcelinkdata);
-
-
-//var radius = d3.scaleSqrt().domain([0,1]).range([25,50]);
-    svg.append("svg:defs").selectAll('marker')
-        .data(['end'])
-        .enter()
-        .append("svg:marker")
-        .attr('id', function (d) {
-            return d;
-        })
-        .attr('viewBox', '0 -5 10 10')
-        .attr('refX', 6)
-        .attr('refY', -1.5)
-        .attr('markerWidth', 6)
-        .attr('markerHeight', 6)
-        .attr('orient', 'auto')
-        .append('svg:path')
-        .attr("d", "M0,-5L10,0L0,5");
-
-
-    var links = svg
-        .append("g")
-        .attr("class", "links")
-        .selectAll("path")
-        .data(simulation.force("link").links())
-        .enter().append("svg:path")
-        .attr("class", "link")
-        .attr("stroke-width", function (d) {
-            return 1
-        })
-        .attr("marker-end", "url(#end)");
-
-    //.attr("marker-end", function(d) { return "url(#" + (d.source.id + "-" + d.target.id).replace(/\s+/g, '') + ")"; })
-
-
-    links.style('fill', 'none')
-        .style('stroke', 'black')
-        .style("stroke-width", '2px');
 
 
     let nodes = svg.append("g")
@@ -232,13 +157,40 @@ function drawBubbleGraph(data) {
         .on("click", async function (d) {
             if (d3.event.shiftKey) {
                 console.log("shift")
-                d.pages = []
-                d.nbrPages = 0
+                d.nbrlines = 0
                 d.edited = true
+
                 deselect(d)
                 return;
             }
             await moveToCenter(d)
+        })
+        .on("mouseover", function (d) {
+            console.log(d)
+            var lines = d.lines
+            var color
+            if (d.nbrlines == 0) {
+                color = "lightgrey";
+            } else {
+                color = defineColor(d)
+            }
+            for (var i = 0; i < lines.length; i++) {
+                $(".prettycode ol.linenums > li:nth-child(" + lines[i] + ")").css({
+                    background: color
+
+                })
+            }
+        })
+        .on("mouseout", function (d) {
+            console.log(d)
+            var lines = d.lines
+            var color = defineColor(d)
+            for (var i = 0; i < lines.length; i++) {
+                $(".prettycode ol.linenums > li:nth-child(" + lines[i] + ")").css({
+                    background: 'transparent'
+
+                })
+            }
         })
 
         .call(
@@ -254,7 +206,7 @@ function drawBubbleGraph(data) {
         .style("stroke-width", 0.5)
         .style("stroke", "black")
         .style('fill', function (d) {
-            if (d.nbrPages == 0) {
+            if (d.nbrlines == 0) {
                 return "lightgrey";
             } else {
                 return defineColor(d)
@@ -262,7 +214,7 @@ function drawBubbleGraph(data) {
         })
         .transition().duration(2000).ease(d3.easeElasticOut)
         .tween('circleIn', (d) => {
-            let i = d3.interpolateNumber(0, scaleRadius(d.nbrPages));
+            let i = d3.interpolateNumber(0, scaleRadius(d.nbrlines));
             return (t) => {
                 d.r = i(t);
                 simulation.force('collide', forceCollide);
@@ -335,16 +287,14 @@ function drawBubbleGraph(data) {
             if (d3.event.shiftKey && target.closest(".circle")) {
                 return;
             }
-
-
             if (d3.event.shiftKey && target.closest("#svg_bubblegraph")) {
 
                 var addedNode = {
                     "degree": 1,
                     "frequency": [],
                     "name": "New_Concept",
-                    "nbrPages": 0,
-                    "pages": [],
+                    "nbrlines": 0,
+                    "lines": [],
                     "r": 45,
                     "associatedLinks": [],
                     "associatedNodes": [],
@@ -375,7 +325,7 @@ function drawBubbleGraph(data) {
                 d3.transition().duration(1000).ease(d3.easePolyOut)
                     .tween('moveOut', function () {
 
-                        let ir = d3.interpolateNumber(focusNode.r, scaleRadius(focusNode.nbrPages))
+                        let ir = d3.interpolateNumber(focusNode.r, scaleRadius(focusNode.nbrlines))
                         return function (t) {
                             focusNode.r = ir(t)
                             simulation.force('collide', forceCollide)
@@ -384,7 +334,7 @@ function drawBubbleGraph(data) {
                     .on('end', () => {
                         let circle = d3.select("circle[id='c_" + focusNode.id + "']")
                         circle.style('fill', function (d) {
-                            if (focusNode.nbrPages === 0) {
+                            if (focusNode.nbrlines === 0) {
                                 return "lightgrey";
                             } else {
                                 var value
@@ -465,20 +415,45 @@ function drawBubbleGraph(data) {
                 return "n_" + d.id
             })
             .style('opacity', function (d) {
-                if (pageMode) {
-                    if (d.pages.includes("Page " + shownPage)) {
-                        return 1
-                    } else {
-                        return 0.25
+                return 1
 
-                    }
+            }).on("mouseover", function (d) {
+                var lines = d.lines
+                var color
+                if (d.nbrlines == 0) {
+                    color = "lightgrey";
+                } else {
+                    color = defineColor(d)
                 }
+                for (var i = 0; i < lines.length; i++) {
+                    $(".prettycode ol.linenums > li:nth-child(" + lines[i] + ")").css({
+                        background: color
 
-                else {
-                    return 1
-
+                    })
                 }
+            })
+            .on("mouseout", function (d) {
+                var lines = d.lines
+                for (var i = 0; i < lines.length; i++) {
+                    console.log(lines[i])
+                    $(".prettycode ol.linenums > li:nth-child(" + lines[i] + ")").css({
+                        background: 'transparent'
 
+                    })
+                }
+            })
+
+            .on("click", async function (d) {
+
+
+                if (d3.event.shiftKey) {
+
+                    d.nbrlines = 0
+                    d.edited = true
+                    deselect(d)
+                    return;
+                }
+                await moveToCenter(d)
             })
             .call(
                 d3.drag()
@@ -492,20 +467,8 @@ function drawBubbleGraph(data) {
             .attr("class", "circle")
             .style("stroke-width", 0.5)
             .style("stroke", "black")
-            .on("mouseover", function (d) {
-                console.log(d)
-                var lines = d.lines
-                var color = defineColor(d)
-                for (var i = 0; i < lines.length; i++) {
-                    console.log(lines[i])
-                    $(".prettycode ol.linenums > li:nth-child(3)").css({
-                        background: color
-
-                    })
-                }
-            })
             .style('fill', function (d) {
-                if (d.nbrPages == 0) {
+                if (d.nbrlines == 0) {
                     if (d.name == "New_Concept") {
                         return "white"
                     }
@@ -557,24 +520,6 @@ function drawBubbleGraph(data) {
             )
         node.exit().remove()
 
-        var link = svg.selectAll(".link")
-            .data(simulation.force("link").links(), function (d) {
-                //console.log(d)
-                return d.index
-            })
-
-        linkEnter = link.enter().append("svg:path").moveToBack()
-            .attr("class", "link")
-            .attr("stroke-width", function (d) {
-                return 1
-            })
-            .attr("marker-end", "url(#end)");
-
-        linkEnter.style('fill', 'none')
-            .style('stroke', 'black')
-            .style("stroke-width", '2px')
-
-        link.exit().remove()
 
         simulation.alphaTarget(0.2).restart();
 
@@ -582,26 +527,6 @@ function drawBubbleGraph(data) {
 
 
     function ticked() {
-
-
-        var link = svg.selectAll(".link")
-
-        link.attr("d", function (d) {
-            var dx = d.target.x - d.source.x,
-                dy = d.target.y - d.source.y,
-                dr = Math.sqrt(dx * dx + dy * dy),
-
-                offsetTargetX = (dx * d.target.r) / dr,
-                offsetTargetY = (dy * d.target.r) / dr
-
-            return "M" +
-                d.source.x + "," +
-                d.source.y + "A" +
-                dr + "," + dr + " 0 0,1 " +
-                (d.target.x - offsetTargetX) + "," +
-                (d.target.y - offsetTargetY);
-
-        });
 
 
         var node = svg.selectAll(".node")
@@ -621,7 +546,7 @@ function drawBubbleGraph(data) {
             return i === nodeClicked.index
         }).transition().duration(800)
             .tween("deselect", function (d) {
-                let irl = d3.interpolateNumber(nodeClicked.r, scaleRadius(nodeClicked.nbrPages))
+                let irl = d3.interpolateNumber(nodeClicked.r, scaleRadius(nodeClicked.nbrlines))
                 return function (t) {
                     nodeClicked.r = irl(t)
                     simulation.force('collide', forceCollide)
@@ -630,7 +555,7 @@ function drawBubbleGraph(data) {
             })
             .on('interrupt', () => {
                 console.log("interupt")
-                nodeClicked.r = scaleRadius(nodeClicked.nbrPages);
+                nodeClicked.r = scaleRadius(nodeClicked.nbrlines);
                 let circle = d3.select("circle[id='c_" + nodeClicked.id + "']")
                 circle.style('fill', function (d) {
 
@@ -639,14 +564,13 @@ function drawBubbleGraph(data) {
                 });
             })
             .on('end', () => {
-                nodeClicked.r = scaleRadius(nodeClicked.nbrPages);
+                nodeClicked.r = scaleRadius(nodeClicked.nbrlines);
                 let circle = d3.select("circle[id='c_" + nodeClicked.id + "']")
                 circle.style('fill', function (d) {
 
                     return "lightgrey";
 
                 });
-                console.log("end")
                 if (nodeClicked.edited) {
                     let image = d3.selectAll("#i1_" + nodeClicked.id)
                     console.log(image)
@@ -673,6 +597,7 @@ function drawBubbleGraph(data) {
                         )
 
                 }
+                console.log("end")
             })
         simulation.alphaTarget(0.2).restart()
         stabilize()
@@ -717,22 +642,19 @@ function drawBubbleGraph(data) {
                     .tween('circleOut', await
 
                         function () {
-                            console.log("lastnode.r", lastNode.r)
-                            console.log("lastnode.radius", lastNode.radius)
-                            console.log("nbrpages", lastNode.nbrPages)
-                            console.log("scale radius", scaleRadius(lastNode.nbrPages))
 
-                            let irl = d3.interpolateNumber(lastNode.r, scaleRadius(lastNode.nbrPages))
+
+                            let irl = d3.interpolateNumber(lastNode.r, scaleRadius(lastNode.nbrlines))
                             return function (t) {
                                 lastNode.r = irl(t)
                             }
                         }
                     )
                     .on('interrupt', () => {
-                        lastNode.r = scaleRadius(lastNode.nbrPages);
+                        lastNode.r = scaleRadius(lastNode.nbrlines);
                         let circle = d3.select("circle[id='c_" + lastNode.id + "']")
                         circle.style('fill', function (d) {
-                            if (lastNode.nbrPages === 0) {
+                            if (lastNode.nbrlines === 0) {
                                 return "lightgrey";
                             } else {
                                 var value
@@ -797,8 +719,20 @@ function drawBubbleGraph(data) {
 
             })
             .on('end', () => {
-                drawArc(currentNode)
-                highlightWords(currentNode)
+                //drawArc(currentNode)
+                //highlightWords(currentNode)
+                if (currentNode.name !== "New_Concept") {
+
+                    drawInfoBox(currentNode)
+
+                } else {
+                    drawEditBox(currentNode)
+                    fillSelecters()
+                    $("#addAnnotationsButton").click(function () {
+                        updateConcept()
+                    })
+                }
+
             })
             .on('interrupt', () => {
                 console.log('move interrupt', currentNode);
@@ -1119,7 +1053,8 @@ function drawBubbleGraph(data) {
             return conceptName
         })
 
-
+        focusNode.nbrlines = maxFreq
+        focusNode.edited = true
         focusNode.fx = null;
         focusNode.fy = null;
 
@@ -1127,7 +1062,7 @@ function drawBubbleGraph(data) {
         d3.transition().duration(1000).ease(d3.easePolyOut)
             .tween('moveOut', function () {
 
-                let ir = d3.interpolateNumber(focusNode.r, scaleRadius(focusNode.nbrPages))
+                let ir = d3.interpolateNumber(focusNode.r, scaleRadius(focusNode.nbrlines))
                 return function (t) {
                     focusNode.r = ir(t)
                     simulation.force('collide', forceCollide)
@@ -1135,7 +1070,7 @@ function drawBubbleGraph(data) {
             }).on('end', () => {
             let circle = d3.select("circle[id='c_" + focusNode.id + "']")
             circle.style('fill', function (d) {
-                if (focusNode.nbrPages === 0) {
+                if (focusNode.nbrlines === 0) {
                     return "lightgrey";
                 } else {
                     var value
@@ -1291,7 +1226,7 @@ function drawBubbleGraph(data) {
 
                 if (idx === -1) {
                     simulation.nodes().push(d)
-                    d.associatedNodes.forEach(function (node, i) {
+                    /*d.associatedNodes.forEach(function (node, i) {
                         var nIdx = -1;
                         simulation.nodes().forEach(function (fnode, j) {
                             if (node.index === fnode.index) {
@@ -1303,7 +1238,7 @@ function drawBubbleGraph(data) {
                                 })
                             }
                         })
-                    })
+                    })*/
                 }
                 else {
 
@@ -1316,7 +1251,7 @@ function drawBubbleGraph(data) {
                     //console.log("sin am !-1")
                     //console.log(simulation.nodes()[idx])
 
-                    simulation.nodes()[idx].associatedLinks.forEach(function (link, i) {
+                    /*simulation.nodes()[idx].associatedLinks.forEach(function (link, i) {
                         var lIdx = -1;
 
                         simulation.force("link").links().forEach(function (llink, j) {
@@ -1330,14 +1265,12 @@ function drawBubbleGraph(data) {
 
                         simulation.force("link").links().splice(lIdx, 1)
 
-                    })
+                    })*/
                     simulation.nodes().splice(idx, 1)
                 }
             }
         })
         simulation.nodes(simulation.nodes())
-        simulation.force("link").links(simulation.force("link").links());
-
         restart()
         //simulation.alphaTarget(0.2).restart()
         simulation.force('collide', forceCollide);
@@ -1368,11 +1301,18 @@ function drawBubbleGraph(data) {
         .clamp(true);
 
 // array useful for step sliders
+    var nbrTicks;
+    if (nodesData.length < 5) {
+        nbrTicks = 1
+    } else {
+        nbrTicks = 5
+    }
+
     var rangeValues = d3.range(range[0], range[1], step || 1).concat(range[1]);
     var xAxis = d3.axisBottom(xScale).tickFormat(function (d) {
         return d;
     });
-    xAxis.tickValues(xScale.ticks(5).concat(xScale.domain()))
+    xAxis.tickValues(xScale.ticks(nbrTicks).concat(xScale.domain()))
 
     xScale.clamp(true);
 // drag behavior initialization

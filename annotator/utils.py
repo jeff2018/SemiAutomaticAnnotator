@@ -172,6 +172,7 @@ def retrieveAnnotations(file):
                 print(d)
                 ca = CodeAnnotation.objects.get(concept_id=d['id'], cs_id=file.id)
                 d['sequenceRank'] = ca.sequenceRank
+                d['frequency'] = ca.frequency
                 lines = LineOfCode.objects.filter(codeAnnotation=ca.id)
                 for line in lines:
                     d['lines'].append(line.lineNumber)

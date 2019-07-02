@@ -5,7 +5,8 @@
 
 .leftside{
     background-color: #111;
-    overflow: auto;
+    overflow-x:hidden;
+    overflow-y:auto;
 
 }
 .rightside{

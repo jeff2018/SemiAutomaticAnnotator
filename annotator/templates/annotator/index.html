@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.4.0/css/bootstrap4-toggle.min.css"
           rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/css/select2.min.css" rel="stylesheet"/>
 
     <!-- <script type="text/javascript" src="/static/js/jquery.filedrop.js"></script>
      <script type="text/javascript" src="/static/js/upload.js"></script>-->
@@ -58,7 +58,7 @@
                 </div>
             </nav>
 
-            <div class="vfill pdfContainer" id ="pdfContainer">
+            <div class="vfill pdfContainer" id="pdfContainer">
                 <div id="pdfView" class="vfill pdfPlaceholder">
                     <div class="inner-content">
                         <button id="upload-button" class="btn btn-danger">Select PDF</button>
@@ -71,7 +71,13 @@
     </div>
 
     <div class="col no-gutters">
+        <div class="overlay vfill">
+            <div class="centered">
+                <div id="loader"></div>
+                <p id="loadingtext">Content loading</p>
+            </div>
 
+        </div>
         <div class="rightside">
 
             <div class="inner-div" style="display:none">
@@ -120,6 +126,8 @@
 <script src="../static/js/viewer.js"></script>
 
 <script type="text/javascript" src="../static/js/bubblegraph.js"></script>
+<script type="text/javascript" src="../static/js/codesnippet_graph.js"></script>
+
 <script type="text/javascript" src="../static/js/renderer.js"></script>
 <script type="text/javascript" src="../static/js/main.js"></script>
 

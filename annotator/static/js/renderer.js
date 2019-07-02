@@ -394,7 +394,7 @@ function retrieveAnnotations(file) {
 
             }
             if(filename.endsWith('.java') || filename.endsWith('.c')) {
-
+                drawCSGraph(res)
             }
 
         }
@@ -520,7 +520,7 @@ function placeFileContent(target, file) {
         var code = document.createElement('code')
 
         pre.className = "prettyprint prettyprinted";
-        code.className='language-java'
+        code.className='prettycode language-java'
         code.innerHTML = PR.prettyPrintOne(content, 'java', true);
         pre.appendChild(code)
         $('#javaView').append(pre);
