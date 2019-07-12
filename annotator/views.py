@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.core.files.storage import FileSystemStorage
 from .models import *
-from .utils import saveResource,retrieveAnnotations,processCS
+from .utils import saveResource,retrieveAnnotations,processCS, processVideo
 from .analysePDF import processPDF
 
 import os
@@ -57,18 +57,30 @@ def processFile(request):
 
                 if myFileExt.lower() == '.pdf':
                     processPDF(f)
+                    res = {"message": "Processed "+str(f.name),"path":f.filepath,"filename":f.name,"id":f.id}
+
+
+
+                    return JsonResponse(res)
+
+        if filename.endswith('.mp4'):
+            f = Video.objects.get(id=fileid)
+            if f:
+                f.duration=data['duration']
+                f.save()
+                processVideo(f)
                 res = {"message": "Processed "+str(f.name),"path":f.filepath,"filename":f.name,"id":f.id}
-
-
-
                 return JsonResponse(res)
+
+
+
         if filename.endswith('.java') or filename.endswith('.c'):
             f = CodeSnippet.objects.get(id=fileid)
             if f:
                 processCS(f)
-            res = {"message": "Processed " + str(f.name), "path": f.filepath, "filename": f.name, "id": f.id}
+                res = {"message": "Processed " + str(f.name), "path": f.filepath, "filename": f.name, "id": f.id}
 
-            return JsonResponse(res)
+                return JsonResponse(res)
 
 
     return render(request,'annotator/index.html')
@@ -79,12 +91,20 @@ def processTxtFile(request):
         data = json.loads(request.body)
         fileid = data['id']
         filename = data['name']
+        print(data)
 
         if filename.endswith('.pdf'):
             file = PDF.objects.get(id=fileid)
 
             res = retrieveAnnotations(file)
             return JsonResponse(res)
+
+        if filename.endswith('.mp4'):
+            file = Video.objects.get(id=fileid)
+
+            #res = retrieveAnnotations(file)
+            #return JsonResponse(res)
+
 
         if filename.endswith('.java') or filename.endswith('.c'):
             file = CodeSnippet.objects.get(id=fileid)

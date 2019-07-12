@@ -44,7 +44,23 @@ body{
     top: 50%; left: 50%;
     transform: translate(-50%,-50%);
 }
-
+.inner-video {
+    width: 100%;
+    height: 50%;
+    position: absolute;
+    top: 40%;
+    left:50%;
+    transform: translate(-50%,-50%);
+}
+.timeline-content {
+    width: 100%;
+    background-color: #f1f1f1;
+    position: absolute;
+    height: 30%;
+    bottom: 5%;
+    left:50%;
+    transform: translate(-50%,-0%);
+}
 .pdfContainer {
     text-align: center;
 
@@ -84,7 +100,7 @@ body{
   left: 50%;
   transform: translate(-50%, -50%)
 }
-.overlay {
+.overlay-loader {
     background: #e9e9e9;
     display: none;
     position: absolute;
@@ -94,6 +110,10 @@ body{
     left: 0;
     z-index:1;
 
+}
+.video-js{
+width: 100%;
+    height: 100%;
 }
 
 .centered {
@@ -202,8 +222,9 @@ svg {
 }
 
 .ticks {
-            font-size: 10px;
-        }
+    font-size: 10px;
+    stroke:white;
+}
 
 .track,
 .track-inset,
@@ -212,13 +233,13 @@ svg {
 }
 
 .track {
-    stroke: #000;
+    stroke: white;
     stroke-opacity: 0.3;
     stroke-width: 10px;
 }
 
 .track-inset {
-    stroke: #dcdcdc;
+    stroke: red;
     stroke-width: 8px;
 }
 
@@ -229,9 +250,12 @@ svg {
     cursor: crosshair;
 }
 
-.handle {
-    fill: #fff;
+
+
+.x-grid line {
+    stroke: gray !important;
+}
+.brush .selection {
     stroke: #000;
-    stroke-opacity: 0.5;
-    stroke-width: 1.25px;
+    fill: red;
 }

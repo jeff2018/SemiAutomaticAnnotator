@@ -32,6 +32,8 @@ class PDF(Resource):
 
 class Video(Resource):
     duration = models.PositiveIntegerField()
+    transcriptionFile = models.CharField(max_length=255,null=True)
+    timestampFile = models.CharField(max_length=255,null=True)
 
 
 class CodeSnippet(Resource):
@@ -60,16 +62,21 @@ class PageAnnotation(Annotation):
 
 class VideoAnnotation(Annotation):
     video = models.ForeignKey(Video, on_delete=models.CASCADE,null=True)
-    degree = models.FloatField(null=True)
-    pagerank = models.FloatField(null=True)
+    URI = models.CharField(max_length=255,null=True)
     camino = models.NullBooleanField()
-
-    timestamp = models.PositiveIntegerField()
 
 
 class CodeAnnotation(Annotation):
     cs = models.ForeignKey(CodeSnippet, on_delete=models.CASCADE,null=True)
     sequenceRank = models.PositiveIntegerField(null=True)
+
+class timestamp(models.Model):
+    time = models.PositiveIntegerField()
+    videoAnnotation = models.ForeignKey(VideoAnnotation,on_delete=models.CASCADE,null=True)
+
+class mappedWords(models.Model):
+    word = models.CharField(max_length=255,null=True)
+    videoAnnotation = models.ForeignKey(VideoAnnotation,on_delete=models.CASCADE,null=True)
 
 
 class LineOfCode(models.Model):

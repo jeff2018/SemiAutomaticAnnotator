@@ -1,15 +1,13 @@
-var pageArray = []
+var pageArray = ["Page 1", "Page 2", "Page 3", "Page 4", "Page 5", "Page 6"];
 
 var $this = $('.inner-div'); // targeted div
 var offset = $this.offset();
 var width = $this.width();
 var height = $this.height();
-var documentMode = true;
+var documentMode = true
 var pageMode = false
 var focusNode = null;
-var pageWheel = null;
-var infoBox = null;
-var checkIcon = "../upload/check128.png"
+
 console.log(width, height)
 
 var svg = d3.select("#svg_bubblegraph"),
@@ -23,80 +21,20 @@ console.log(centerX, centerY)
 var color = d3.scaleSequential(d3.interpolateRainbow);
 var colorPage = d3.scaleOrdinal(d3.schemeCategory10);
 
-var defs = svg.append("defs")
-    .selectAll("foo")
-    .data(d3.range(10))
-    .enter()
-    .append("linearGradient")
-    .attr("id", function (d) {
-        return "grad" + d
-    })
-    .attr('gradientUnits', 'userSpaceOnUse')
-    .attr("x1", "0%")
-    .attr("x2", "0%")
-    .attr("y1", "100%")
-    .attr("y2", "0%")
-
-defs.append('stop')
-    .attr('offset', '50%')
-    .attr('stop-color', 'white');
-
-defs.append("stop")
-    .attr("offset", "50%")
-    .style("stop-color", function (d) {
-        return colorPage(d)
-    })
-
-
-function updateStops(data, i) {
-    var stops = d3.select('#grad' + i).selectAll('stop')
-        .data(data);
-
-    stops.enter().append('stop');
-
-    stops
-        .attr('offset', function (d) {
-            return d[0];
-        })
-
-
-    stops.exit().remove();
-}
-
-
 function drawBubbleGraph(data) {
 
     focusNode = null;
-
-    for (var i = 1; i <= data.pages; i++) {
-        pageArray.push("Page " + i)
-    }
+    var pageWheel;
+    var infoBox;
 
     var scaleRadius = d3.scaleLinear().domain([0, pageArray.length]).range([40, 75]);
     var maxRadiusFocusNode = centerY * 0.75;
 
     //sort the data according to the averagedegree for the ranking
-    data.nodes.sort(function (a, b) {
+    /*data.nodes.sort(function (a, b) {
         return b.avgDegree - a.avgDegree
-    })
-    data.links.sort(function (a, b) {
-        return a.index - b.index
-    })
+    })*/
 
-    console.log(data.pages)
-
-
-    var maxPerFreqArray = data.nodes.map(d => Math.max.apply(null, d.frequency));
-    var maxFrequency = Math.max.apply(null, maxPerFreqArray)
-    var minPerFreqArray = data.nodes.map(d => Math.min.apply(null, d.frequency));
-    var minFrequency = Math.min.apply(null, minPerFreqArray)
-
-    var maxID = Math.max.apply(Math, data.nodes.map(function (d) {
-        return d.id;
-    }))
-    console.log(maxID)
-
-    var scaleGradient = d3.scaleLinear().domain([minFrequency, maxFrequency]).range([1, 100])
 
     let pack = d3.pack()
         .size([width, height])
@@ -143,17 +81,15 @@ function drawBubbleGraph(data) {
             uri: data.uri,
             nbrPages: data.pages.length,
             pages: data.pages,
-            frequency: data.frequency,
             id: data.id,
-            degree: data.avgDegree,
-            edited: false
+            degree: data.avgDegree
 
         }
     });
     //separated dataset for the forcesimulation which is needed for the slider
-    /*data.links.forEach(function (d, i) {
+    data.links.forEach(function (d, i) {
         d.index = i
-    })*/
+    })
     var forcenodedata = nodesData.map(function (node, i) {
         return node;
     })
@@ -161,25 +97,25 @@ function drawBubbleGraph(data) {
         return link;
     })
     console.log(nodesData)
-    console.log(forcenodedata)
-
     nodesData.forEach(function (node, i) {
         node.rank = i + 1
 
         node.associatedLinks = data.links.filter(function (link, j) {
-
+            //console.log(link)
+            //console.log(link.source, link.target, node.id)
             return link.source == node.id || link.target == node.id;
         })
     })
 
     nodesData.forEach(function (node, i) {
-
+        console.log(node)
         node.associatedNodes = []
         node.associatedLinks.forEach(function (link, j) {
             if (link.source !== node.id) {
                 node.associatedNodes.push(nodesData.find(x => x.id === link.source))
             }
             else {
+                console.log(nodesData.find(x => x.id === link.target))
                 node.associatedNodes.push(nodesData.find(x => x.id === link.target))
             }
         })
@@ -232,23 +168,17 @@ function drawBubbleGraph(data) {
         .selectAll('.node')
         .data(forcenodedata)
         .enter().append('g')
-        .attr('id', function (d) {
-            return "n_" + d.id
-        })
         .attr('class', 'node')
         //.style('opacity', 0.2)
         .on("click", async function (d) {
             if (d3.event.shiftKey) {
-                console.log("shift")
                 d.pages = []
                 d.nbrPages = 0
-                d.edited = true
                 deselect(d)
                 return;
             }
             await moveToCenter(d)
         })
-
         .call(
             d3.drag()
                 .on("start", dragstarted)
@@ -280,7 +210,7 @@ function drawBubbleGraph(data) {
 
     nodes.append('text')
         .attr("id", function (d, i) {
-            return "t_" + d.id
+            return "t_" + i
         })
         .attr("class", "nodeText")
         //.attr("dy", ".3em")
@@ -298,33 +228,17 @@ function drawBubbleGraph(data) {
         .each(function (d, i) {
             let r = d3.select("circle[id='c_" + d.id + "']").attr("r")
             //console.log(r)
-            svg.select("#t_" + d.id)
+            svg.select("#t_" + i)
                 .call(wrap2, 2 * r)
 
         })
 
         .style("font-size", "15px")
-
-    nodes.append('image')
-        .attr("id", function (d) {
-            return "i1_" + d.id
-        })
-        .style("text-anchor", "middle")
-        .attr("class", "bubbleImage")
-        .style("visibility", "hidden")
-        .attr("xlink:href", function (d) {
-
-                return checkIcon
-
-
-            }
-        )
     /*
     .each(getSize)
     .style("font-size",function (d) {
         console.log(d)
         return d.scale
-
     });*/
 
 
@@ -336,41 +250,9 @@ function drawBubbleGraph(data) {
                 //  console.log("as en pagearc")
                 return;
             }
-            if (target.closest(".fa") || target.closest("#nextPage") || target.closest("#prevPage") || target.closest("#selectbox") || target.closest("#concepts") || target.closest("#schemeList") || target.closest("#addAnnotationsButton")) {
+            if (target.closest(".fa") || target.closest("#nextPage") || target.closest("#prevPage")) {
 
                 return;
-            }
-            if (d3.event.shiftKey && target.closest(".circle")) {
-                return;
-            }
-
-
-            if (d3.event.shiftKey && target.closest("#svg_bubblegraph")) {
-
-                var addedNode = {
-                    "degree": 1,
-                    "frequency": [],
-                    "name": "New_Concept",
-                    "nbrPages": 0,
-                    "pages": [],
-                    "r": 45,
-                    "associatedLinks": [],
-                    "associatedNodes": [],
-                    "x": 0,
-                    "y": 0,
-                    "id": maxID + 1,
-                    "rank": 0,
-                    "edited": false
-                }
-                maxID = maxID + 1
-                nodesData.push(addedNode)
-                simulation.nodes().push(addedNode)
-                simulation.nodes(simulation.nodes())
-                console.log(nodesData)
-                console.log(simulation.nodes())
-                restart()
-                stabilize()
-                return
             }
 
             if (!target.closest(".circle") && focusNode) {
@@ -390,7 +272,7 @@ function drawBubbleGraph(data) {
                         }
                     })
                     .on('end', () => {
-                        let circle = d3.select("circle[id='c_" + focusNode.id + "']")
+                        let circle = d3.select("circle[id='c_" + focusNode.index + "']")
                         circle.style('fill', function (d) {
                             if (focusNode.nbrPages === 0) {
                                 return "lightgrey";
@@ -406,31 +288,6 @@ function drawBubbleGraph(data) {
                                 return color(value)
                             }
                         });
-                        if (focusNode.edited) {
-                            let image = d3.selectAll("#i1_" + focusNode.id)
-                            image.style("visibility", "visible")
-                                .attr('width', function (d) {
-
-                                        return focusNode.r
-                                    }
-                                )
-                                .attr('height', function (d) {
-
-                                        return focusNode.r
-                                    }
-                                )
-                                .attr("x", function (d) {
-
-                                    return -focusNode.r / 2
-                                })
-
-                                .attr("y", function (d) {
-
-                                        return focusNode.r / 2 - d.r * 0.5
-                                    }
-                                )
-
-                        }
                         focusNode = null;
                         pageWheel = null;
                         infoBox = null;
@@ -460,247 +317,14 @@ function drawBubbleGraph(data) {
         }
     )
 
-    function restart() {
 
-        var node = svg.selectAll(".node")
-            .data(simulation.nodes(), function (d) {
-                //console.log(d.index)
-                return d.index
-            })
-        nodeEnter = node.enter().append('g')
-            .attr('class', 'node')
-            .attr('id', function (d) {
-                return "n_" + d.id
-            })
-            .style('opacity', function (d) {
-                if (pageMode) {
-                    if (d.pages.includes("Page " + shownPage)) {
-                        return 1
-                    } else {
-                        return 0.25
-
-                    }
-                }
-
-                else {
-                    return 1
-
-                }
-
-            })
-            .on("click", async function (d) {
-            if (d3.event.shiftKey) {
-                console.log("shift")
-                d.pages = []
-                d.nbrPages = 0
-                d.edited = true
-                deselect(d)
-                return;
-            }
-            await moveToCenter(d)
-        })
-            .call(
-                d3.drag()
-                    .on("start", dragstarted)
-                    .on("drag", dragged)
-                    .on("end", dragended))
-
-        nodeEnter.append("circle")
-            .attr('id', d => "c_" + d.id)
-            .attr('r', 0)
-            .attr("class", "circle")
-            .style("stroke-width", 0.5)
-            .style("stroke", "black")
-
-            .style('fill', function (d) {
-                if (d.nbrPages == 0) {
-                    if (d.name == "New_Concept") {
-                        return "white"
-                    }
-                    return "lightgrey";
-                } else {
-                    return defineColor(d)
-                }
-            })
-        nodeEnter.append('text')
-            .attr("id", function (d, i) {
-                return "t_" + d.id
-            })
-            .attr("class", "nodeText")
-            //.attr("dy", ".3em")
-            .attr("x", function (d) {
-                return 0
-            })
-            .attr("y", function (d) {
-                return 0
-
-            })
-            .style("text-anchor", "middle")
-            .text(function (d) {
-                return d.name
-            })
-            .each(function (d, i) {
-
-                let r = d3.select("circle[id='c_" + d.id + "']").attr("r")
-
-                svg.select("#t_" + d.id)
-                    .call(wrap2, 2 * r)
-
-            })
-            .style("font-size", "15px")
-
-        nodeEnter.append('image')
-            .attr("id", function (d) {
-                return "i1_" + d.id
-            })
-            .style("text-anchor", "middle")
-            .attr("class", "bubbleImage")
-            .style("visibility", "hidden")
-            .attr("xlink:href", function (d) {
-
-                    return checkIcon
-
-
-                }
-            )
-        node.exit().remove()
+    function ticked() {
 
         var link = svg.selectAll(".link")
             .data(simulation.force("link").links(), function (d) {
-
+                //console.log(d)
                 return d.index
             })
-
-        linkEnter = link.enter().append("svg:path").moveToBack()
-            .attr("class", "link")
-            .attr("stroke-width", function (d) {
-                return 1
-            })
-            .attr("marker-end", "url(#end)");
-
-        linkEnter.style('fill', 'none')
-            .style('stroke', 'black')
-            .style("stroke-width", '2px')
-
-        link.exit().remove()
-
-        simulation.alphaTarget(0.2).restart();
-
-    }
-
-
-    function ticked() {
-       /* var link = svg.selectAll(".link")
-        .data(simulation.force("link").links(),function(d){
-            //console.log(d)
-            return d.index
-        })
-
-       link.attr("d", function(d) {
-        var dx = d.target.x - d.source.x,
-            dy = d.target.y - d.source.y,
-            dr = Math.sqrt(dx * dx + dy * dy),
-
-            offsetTargetX = (dx * d.target.r)/dr,
-            offsetTargetY = (dy * d.target.r)/dr
-
-        return "M" +
-            d.source.x + "," +
-            d.source.y + "A" +
-            dr + "," + dr + " 0 0,1 " +
-            (d.target.x-offsetTargetX)+ "," +
-            (d.target.y-offsetTargetY);
-
-        });
-
-        link.exit().remove()
-
-    linkEnter = link.enter().append("svg:path").moveToBack()
-        .attr("class", "link")
-        .attr("stroke-width", function(d) { return 1 })
-        .attr("marker-end", "url(#end)");
-
-    linkEnter.style('fill', 'none')
-        .style('stroke', 'black')
-        .style("stroke-width", '2px')
-
-    var node = svg.selectAll(".node")
-        .data(simulation.nodes(),function(d){
-             //console.log(d.index)
-             return d.index
-         })
-    nodeEnter =node.enter().append('g')
-        .attr('class', 'node')
-        .style('opacity', function(d) {
-            if (pageMode){
-                if(d.pages.includes("Page " + shownPage)){
-                    return 1
-                }else{
-                    return 0.25
-
-                }
-            }
-
-            else{
-                return 1
-
-            }
-
-        })
-
-        .on("click", async function (d) {
-            await moveToCenter(d)
-        })
-        .call(
-            d3.drag()
-                .on("start", dragstarted)
-                .on("drag", dragged)
-                .on("end", dragended))
-
-     nodeEnter.append("circle")
-            .attr('id', d => "c_" + d.id)
-            .attr('r', 0)
-            .attr("class", "circle")
-            .style("stroke-width",0.5)
-            .style("stroke","black")
-            .style('fill', function (d) {
-            if (d.nbrPages == 0) {
-                return "lightgrey";
-            } else {
-                return defineColor(d)
-            }
-        })
-        nodeEnter.append('text')
-        .attr("id", function (d, i) {
-            return "t_" + i
-        })
-        .attr("class", "nodeText")
-        //.attr("dy", ".3em")
-        .attr("x", function (d) {
-            return 0
-        })
-        .attr("y", function (d) {
-            return 0
-
-        })
-        .style("text-anchor", "middle")
-        .text(function (d) {
-            return d.name
-        })
-        .each(function (d, i) {
-
-            let r = d3.select("circle[id='c_" + d.id + "']").attr("r")
-
-            svg.select("#t_" + i)
-                .call(wrap2, 2 * r)
-
-        })
-            .style("font-size", "15px")
-
-    node.exit().remove()*/
-
-
-        var link = svg.selectAll(".link")
 
         link.attr("d", function (d) {
             var dx = d.target.x - d.source.x,
@@ -719,8 +343,93 @@ function drawBubbleGraph(data) {
 
         });
 
+        link.exit().remove()
+
+        linkEnter = link.enter().append("svg:path").moveToBack()
+            .attr("class", "link")
+            .attr("stroke-width", function (d) {
+                return 1
+            })
+            .attr("marker-end", "url(#end)");
+
+        linkEnter.style('fill', 'none')
+            .style('stroke', 'black')
+            .style("stroke-width", '2px')
 
         var node = svg.selectAll(".node")
+            .data(simulation.nodes(), function (d) {
+                //console.log(d.index)
+                return d.index
+            })
+        nodeEnter = node.enter().append('g')
+            .attr('class', 'node')
+            .style('opacity', function (d) {
+                if (pageMode) {
+                    if (d.pages.includes("Page " + shownPage)) {
+                        return 1
+                    } else {
+                        return 0.25
+
+                    }
+                }
+
+                else {
+                    return 1
+
+                }
+
+            })
+
+            .on("click", async function (d) {
+                await moveToCenter(d)
+            })
+            .call(
+                d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended))
+
+        nodeEnter.append("circle")
+            .attr('id', d => "c_" + d.id)
+            .attr('r', 0)
+            .attr("class", "circle")
+            .style("stroke-width", 0.5)
+            .style("stroke", "black")
+            .style('fill', function (d) {
+                if (d.nbrPages == 0) {
+                    return "lightgrey";
+                } else {
+                    return defineColor(d)
+                }
+            })
+        nodeEnter.append('text')
+            .attr("id", function (d, i) {
+                return "t_" + i
+            })
+            .attr("class", "nodeText")
+            //.attr("dy", ".3em")
+            .attr("x", function (d) {
+                return 0
+            })
+            .attr("y", function (d) {
+                return 0
+
+            })
+            .style("text-anchor", "middle")
+            .text(function (d) {
+                return d.name
+            })
+            .each(function (d, i) {
+
+                let r = d3.select("circle[id='c_" + d.id + "']").attr("r")
+
+                svg.select("#t_" + i)
+                    .call(wrap2, 2 * r)
+
+            })
+            .style("font-size", "15px")
+
+        node.exit().remove()
 
 
         node.attr("transform", function (d) {
@@ -728,7 +437,6 @@ function drawBubbleGraph(data) {
         });
         node.select('circle')
             .attr('r', d => d.r)
-
     };
 
     async function deselect(nodeClicked) {
@@ -748,7 +456,7 @@ function drawBubbleGraph(data) {
             .on('interrupt', () => {
                 console.log("interupt")
                 nodeClicked.r = scaleRadius(nodeClicked.nbrPages);
-                let circle = d3.select("circle[id='c_" + nodeClicked.id + "']")
+                let circle = d3.select("circle[id='c_" + nodeClicked.index + "']")
                 circle.style('fill', function (d) {
 
                     return "lightgrey";
@@ -757,42 +465,15 @@ function drawBubbleGraph(data) {
             })
             .on('end', () => {
                 nodeClicked.r = scaleRadius(nodeClicked.nbrPages);
-                let circle = d3.select("circle[id='c_" + nodeClicked.id + "']")
+                let circle = d3.select("circle[id='c_" + nodeClicked.index + "']")
                 circle.style('fill', function (d) {
 
                     return "lightgrey";
 
                 });
                 console.log("end")
-                if (nodeClicked.edited) {
-                    let image = d3.selectAll("#i1_" + nodeClicked.id)
-                    console.log(image)
-                    image.style("visibility", "visible")
-                        .attr('width', function (d) {
-
-                                return nodeClicked.r
-                            }
-                        )
-                        .attr('height', function (d) {
-
-                                return nodeClicked.r
-                            }
-                        )
-                        .attr("x", function (d) {
-
-                            return -nodeClicked.r / 2
-                        })
-
-                        .attr("y", function (d) {
-
-                                return nodeClicked.r / 2 - nodeClicked.r * 0.5
-                            }
-                        )
-
-                }
             })
         simulation.alphaTarget(0.2).restart()
-        stabilize()
 
     }
 
@@ -806,6 +487,7 @@ function drawBubbleGraph(data) {
             .style('opacity', 1.0);
 
         if (currentNode === focusNode) {
+            console.log("True as equal")
             return;
         }
 
@@ -827,71 +509,44 @@ function drawBubbleGraph(data) {
 
             lastNode.fx = null;
             lastNode.fy = null;
-            let nodeSelection = d3.selectAll('.node').filter(function (d, i) {
-                    return d.id === lastNode.id
-                })
-                    .transition().duration(2000)
-                    .tween('circleOut', await
+            d3.selectAll('.node').filter(function (d, i) {
+                return d.id === lastNode.id
+            })
+                .transition().duration(2000)
+                .tween('circleOut', await
 
-                        function () {
-                            console.log("lastnode.r", lastNode.r)
-                            console.log("lastnode.radius", lastNode.radius)
-                            console.log("nbrpages", lastNode.nbrPages)
-                            console.log("scale radius", scaleRadius(lastNode.nbrPages))
+                    function () {
+                        console.log("lastnode.r", lastNode.r)
+                        console.log("lastnode.radius", lastNode.radius)
+                        console.log("nbrpages", lastNode.nbrPages)
+                        console.log("scale radius", scaleRadius(lastNode.nbrPages))
 
-                            let irl = d3.interpolateNumber(lastNode.r, scaleRadius(lastNode.nbrPages))
-                            return function (t) {
-                                lastNode.r = irl(t)
-                            }
+                        let irl = d3.interpolateNumber(lastNode.r, scaleRadius(lastNode.nbrPages))
+                        return function (t) {
+                            lastNode.r = irl(t)
                         }
-                    )
-                    .on('interrupt', () => {
-                        lastNode.r = scaleRadius(lastNode.nbrPages);
-                        let circle = d3.select("circle[id='c_" + lastNode.id + "']")
-                        circle.style('fill', function (d) {
-                            if (lastNode.nbrPages === 0) {
-                                return "lightgrey";
+                    }
+                )
+                .on('interrupt', () => {
+                    lastNode.r = scaleRadius(lastNode.nbrPages);
+                    let circle = d3.select("circle[id='c_" + lastNode.id + "']")
+                    circle.style('fill', function (d) {
+                        if (lastNode.nbrPages === 0) {
+                            return "lightgrey";
+                        } else {
+                            var value
+                            var i = parseFloat("0." + lastNode.index)
+                            if (isEven(lastNode.index)) {
+                                value = i
                             } else {
-                                var value
-                                var i = parseFloat("0." + lastNode.index)
-                                if (isEven(lastNode.index)) {
-                                    value = i
-                                } else {
-                                    value = 1.0 - i
-                                }
-
-                                return color(value)
+                                value = 1.0 - i
                             }
-                        })
-                        console.log(lastNode.edited)
-                        if (lastNode.edited) {
-                            let image = d3.selectAll("#i1_" + lastNode.id)
-                            console.log(image)
-                            image.style("visibility", "visible")
-                                .attr('width', function (d) {
 
-                                        return lastNode.r
-                                    }
-                                )
-                                .attr('height', function (d) {
-
-                                        return lastNode.r
-                                    }
-                                )
-                                .attr("x", function (d) {
-
-                                    return -lastNode.r / 2
-                                })
-
-                                .attr("y", function (d) {
-
-                                        return lastNode.r / 2 - lastNode.r * 0.5
-                                    }
-                                )
-
+                            return color(value)
                         }
-
                     })
+
+                })
             ;
         }
 
@@ -1005,29 +660,14 @@ function drawBubbleGraph(data) {
             .attr("fill", function (d, i) {
                 //console.log(currentNode.pages)
                 if (currentNode.pages.includes(d.data)) {
-                    var colorgradient = scaleGradient(currentNode.frequency[i])
-                    console.log(colorgradient, currentNode.frequency[i])
-                    var colorgradientWhite = 100 - colorgradient
-                    //updateStops([[colorgradientWhite+"%"], [colorgradient+"%"]],i)
-                    return "url(#grad" + i + ")";
+                    return colorPage(i);
                 } else {
                     return "lightgrey"
                 }
 
             })
-            .style("opacity", 1)/*function(d,i){
-                //console.log(d.data,i,d,currentNode.pages,currentNode.frequency)
-
-                if(currentNode.pages.includes(d.data)){
-                    var freq =currentNode.frequency[i]
-                    return scaleOpacity(freq)
-
-                }else{
-                    return 1
-                }
-            })*/
             .style("stroke", "White")
-            .style("stroke-width", 2)
+            .style("stroke-widht", "2")
             .transition()
             .attrTween('d', function (d) {
                 var i = d3.interpolate(d.startAngle + 0.1, d.endAngle);
@@ -1058,26 +698,15 @@ function drawBubbleGraph(data) {
                     .on("mouseover", pieceMouseOver)
                     .on("mouseout", pieceMouseOut)
                     .on("click", function (d) {
-                        currentNode.edited = true
                         toggleColor(d)
                         updatePageSelection(d)
-                        console.log(d)
                         //console.log(currentNode.pages)
 
                     })
 
 
             })
-        if (currentNode.name !== "New_Concept") {
-            await drawInfoBox(currentNode)
-
-        } else {
-            await drawEditBox(currentNode)
-            fillSelecters()
-            $("#addAnnotationsButton").click(function () {
-                updateConcept()
-            })
-        }
+        await drawInfoBox(currentNode)
 
         function updatePageSelection(d) {
             var pages = currentNode.pages
@@ -1099,55 +728,32 @@ function drawBubbleGraph(data) {
 
     }
 
-    async function drawEditBox(currentNode) {
-        var posX = currentNode.fx - ((maxRadiusFocusNode + (maxRadiusFocusNode / 2.5)) / 2)
-        var posY = currentNode.fy - ((maxRadiusFocusNode + (maxRadiusFocusNode / 2.5)) / 2)
-        var boxWidth = maxRadiusFocusNode + (maxRadiusFocusNode / 2.5)
-
-        infoBox = svg.selectAll("infobox")
-            .data([1])
-            .enter()
-            .append("g")
-            .attr('transform', 'translate(' + posX + ',' + posY + ')');
-
-
-        var infoRect = infoBox.append("rect")
-
-            .attr("class", "infoRect")
-            .attr("height", boxWidth)
-            .attr("width", boxWidth)
-            .attr("fill", "lightgrey")
-
-        var fo = infoBox.append("foreignObject")
-            .attr("class", "fo")
-            .attr("x", boxWidth / 4)
-            .attr("y", boxWidth / 4)
-            .attr("width", boxWidth / 2)
-            .attr("height", boxWidth / 2)
-            .append("xhtml:body")
-            .html("<div class='form-group'><select id='schemeList' class=\"selectpicker\"  title=\"Select 1 or more schemes\"></select></div><div class=\"form-group\"> <select id=\"concepts\" class=\"form-control\" ></select></div><div class=\"form-group text-center\"><button class=\"btn btn-info\" id=\"addAnnotationsButton\" >Update</button></div>")
-            .style("background-color", "lightgrey")
-
-    }
-
     async function drawInfoBox(currentNode) {
-        console.log(currentNode)
 
-        if (currentNode.uri.includes('dbr:')) {
-            var results = await querySPARQL(currentNode);
-
-        } else {
-            var almarelated = await almaRequest(currentNode)
-            console.log(almarelated)
-            currentNode.uri = almarelated
-            var results = await querySPARQL(currentNode)
-        }
+        var results = await querySPARQL(currentNode);
         console.log(results)
 
         var posX = currentNode.fx - ((maxRadiusFocusNode + (maxRadiusFocusNode / 2.5)) / 2)
         var posY = currentNode.fy - ((maxRadiusFocusNode + (maxRadiusFocusNode / 2.5)) / 2)
         var boxWidth = maxRadiusFocusNode + (maxRadiusFocusNode / 2.5)
-
+        /*
+        var div = d3.select("#scroll")
+            .style("height",boxWidth+"px")
+            .style("width",boxWidth+"px")
+            .style("top",0 +"px")
+            .style("left",0 +"px")
+            .text(results[0][0].abstract.value)
+        var infobox = svg.append("g")
+            .attr("class","infobox")
+            .attr('transform', 'translate(' + posX + ',' + posY + ')');
+        var foreign = infobox.append("foreignObject")
+            .attr("width",boxWidth)
+            .attr("height",boxWidth)
+            .append(div)
+         .style("overflow-y","scroll")
+            .text(results[0][0].abstract.value)
+            .style("font-size", "14px")
+    */
         console.log("Boxwidth", boxWidth * 0.32)
         infoBox = svg.selectAll("infobox")
             .data(results)
@@ -1155,6 +761,15 @@ function drawBubbleGraph(data) {
             .append("g")
             .attr('transform', 'translate(' + posX + ',' + posY + ')');
 
+        /* var fo= infoBox.append("foreignObject")
+             .attr('class',"container")
+             .attr("height", boxWidth)
+             .attr("width", boxWidth)
+         var div = fo.append("div")
+             .attr('class',"content")
+             .attr("id","viz")
+             .attr("height", boxWidth)
+             .attr("width", boxWidth)*/
 
         var infoRect = infoBox.append("rect")
 
@@ -1224,104 +839,6 @@ function drawBubbleGraph(data) {
 
 
     }
-
-    function updateConcept() {
-        var textScheme = $("#schemeList").find('option:selected').text()
-        var valScheme = $("#schemeList").val()
-        var conceptName = $("#concepts").find('option:selected').text()
-        var valConcept = $("#concepts").val()
-        let text = d3.select("text[id='t_" + focusNode.id + "']")
-        console.log(text)
-        text.text(function (d) {
-            return conceptName
-        })
-
-
-        focusNode.fx = null;
-        focusNode.fy = null;
-
-        simulation.alphaTarget(0.35).restart();
-        d3.transition().duration(1000).ease(d3.easePolyOut)
-            .tween('moveOut', function () {
-
-                let ir = d3.interpolateNumber(focusNode.r, scaleRadius(focusNode.nbrPages))
-                return function (t) {
-                    focusNode.r = ir(t)
-                    simulation.force('collide', forceCollide)
-                }
-            }).on('end', () => {
-            let circle = d3.select("circle[id='c_" + focusNode.id + "']")
-            circle.style('fill', function (d) {
-                if (focusNode.nbrPages === 0) {
-                    return "lightgrey";
-                } else {
-                    var value
-                    var i = parseFloat("0." + focusNode.index)
-                    if (isEven(focusNode.index)) {
-                        value = i
-                    } else {
-                        value = 1.0 - i
-                    }
-
-                    return color(value)
-                }
-            });
-            if (focusNode.edited) {
-                let image = d3.selectAll("#i1_" + focusNode.id)
-                image.style("visibility", "visible")
-                    .attr('width', function (d) {
-
-                            return focusNode.r
-                        }
-                    )
-                    .attr('height', function (d) {
-
-                            return focusNode.r
-                        }
-                    )
-                    .attr("x", function (d) {
-
-                        return -focusNode.r / 2
-                    })
-
-                    .attr("y", function (d) {
-
-                            return focusNode.r / 2 - focusNode.r * 0.5
-                        }
-                    )
-
-            }
-            focusNode.name = conceptName
-            focusNode.uri = valConcept
-
-            focusNode = null;
-            pageWheel = null;
-            infoBox = null;
-            simulation.alphaTarget(0)
-
-            console.log(nodesData)
-        }).on('interrupt', () => {
-            simulation.alphaTarget(0)
-
-        });
-
-        d3.selectAll('.node')
-            .filter(function (d, i) {
-                return d.id !== focusNode.id;
-            })
-            .transition().duration(2000)
-            .style('opacity', 1.0);
-
-        if (pageWheel) {
-            pageWheel.remove()
-
-        }
-        if (infoBox) {
-            infoBox.remove()
-
-        }
-    }
-
 
     function arrayRemove(arr, value) {
 
@@ -1393,13 +910,13 @@ function drawBubbleGraph(data) {
         selection.style("stroke-width", "1")
     }
 
-//sliderstuff
+    //sliderstuff
     function update(h) {
 
         nodesData.forEach(function (d, i) {
             var idx = -1;
             simulation.nodes().forEach(function (node, j) {
-                if (node.index === d.index) {
+                if (node.id === d.id) {
                     idx = j
                 }
 
@@ -1411,7 +928,7 @@ function drawBubbleGraph(data) {
                     d.associatedNodes.forEach(function (node, i) {
                         var nIdx = -1;
                         simulation.nodes().forEach(function (fnode, j) {
-                            if (node.index === fnode.index) {
+                            if (node.id === fnode.id) {
                                 d.associatedLinks.forEach(function (link, k) {
                                     if (link.target.id === fnode.id || link.source.id === fnode.id) {
                                         simulation.force("link").links().push(link)
@@ -1432,38 +949,28 @@ function drawBubbleGraph(data) {
                 if (idx !== -1) {
                     //console.log("sin am !-1")
                     //console.log(simulation.nodes()[idx])
-                    //console.log(simulation.nodes()[idx])
+
                     simulation.nodes()[idx].associatedLinks.forEach(function (link, i) {
                         var lIdx = -1;
 
                         simulation.force("link").links().forEach(function (llink, j) {
 
-                            if (llink.id === link.id) {
+                            if (llink.id=== link.id) {
                                 lIdx = j;
-                                //console.log(llink,llink.index,link,link.index)
                                 //console.log("links splicen")
 
                             }
                         })
 
                         simulation.force("link").links().splice(lIdx, 1)
-                        //console.log(simulation.force("link").links())
-
 
                     })
-
                     simulation.nodes().splice(idx, 1)
-
                 }
             }
         })
 
-        simulation.nodes(simulation.nodes())
-        //simulation.force("link").links(simulation.force("link").links());
-
-        restart()
-        //simulation.alphaTarget(0.2).restart()
-
+        simulation.alphaTarget(0.2).restart()
         simulation.force('collide', forceCollide);
         stabilize()
 
@@ -1485,13 +992,13 @@ function drawBubbleGraph(data) {
         .classed('slider', true)
         .attr('transform', 'translate(' + (centerX - width / 6) + ', ' + (height * 0.95) + '30)');
 
-// using clamp here to avoid slider exceeding the range limits
+    // using clamp here to avoid slider exceeding the range limits
     var xScale = d3.scaleLinear()
         .domain(range)
         .range([0, width / 3])
         .clamp(true);
 
-// array useful for step sliders
+    // array useful for step sliders
     var rangeValues = d3.range(range[0], range[1], step || 1).concat(range[1]);
     var xAxis = d3.axisBottom(xScale).tickFormat(function (d) {
         return d;
@@ -1499,7 +1006,7 @@ function drawBubbleGraph(data) {
     xAxis.tickValues(xScale.ticks(5).concat(xScale.domain()))
 
     xScale.clamp(true);
-// drag behavior initialization
+    // drag behavior initialization
     var drag = d3.drag()
         .on('start.interrupt', function () {
             slider.interrupt();
@@ -1507,32 +1014,32 @@ function drawBubbleGraph(data) {
             dragSlider(d3.event.x);
         });
 
-// this is the main bar with a stroke (applied through CSS)
+    // this is the main bar with a stroke (applied through CSS)
     var track = slider.append('line').attr('class', 'track')
         .attr('x1', xScale.range()[0])
         .attr('x2', xScale.range()[1]);
 
-// this is a bar (steelblue) that's inside the main "track" to make it look like a rect with a border
+    // this is a bar (steelblue) that's inside the main "track" to make it look like a rect with a border
     var trackInset = d3.select(slider.node().appendChild(track.node().cloneNode())).attr('class', 'track-inset');
 
     var ticks = slider.append('g').attr('class', 'ticks').attr('transform', 'translate(0, 4)')
         .call(xAxis);
 
-// drag handle
+    // drag handle
     var handle = slider.append('circle').classed('handle', true)
         .attr('r', 8);
 
-// this is the bar on top of above tracks with stroke = transparent and on which the drag behaviour is actually called
-// try removing above 2 tracks and play around with the CSS for this track overlay, you'll see the difference
+    // this is the bar on top of above tracks with stroke = transparent and on which the drag behaviour is actually called
+    // try removing above 2 tracks and play around with the CSS for this track overlay, you'll see the difference
     var trackOverlay = d3.select(slider.node().appendChild(track.node().cloneNode())).attr('class', 'track-overlay')
         .call(drag);
 
-// text to display
+    // text to display
     var text = svg.append('text').attr('transform', 'translate(' + (centerX) + ', ' + (height * 0.99) + ')')
         .text('Value: 0');
 
 
-// initial transition
+    // initial transition
     slider.transition().duration(750)
         .tween("drag", function () {
             var i = d3.interpolate(0, initialValue);
@@ -1706,69 +1213,6 @@ function wrap2(text, width) {
 
 }
 
-async function almaRequest(currentNode) {
-    var conceptUri = currentNode.uri
-    var result
-
-    if (conceptUri.includes("c:") || conceptUri.includes("java:")) {
-
-        var resp = await almaCorJavaConcept(conceptUri)
-        var programmingUri = resp.related[0]
-        var resp2 = await almaProgConcept(programmingUri)
-        resp2.related.forEach(function (d) {
-            if (d.includes("dbr")) {
-                result = d
-            }
-        })
-        return result
-        /*$.when(almaCorJavaConcept(conceptUri).then(function successHandler(response) {
-            console.log(response)
-            var programmingUri = response.related[0]
-            console.log(programmingUri)
-            $.when(almaProgConcept(programmingUri).then(function successHandler(response) {
-                console.log(response)
-                response.related.forEach(function(d){
-                    if(d.includes("dbr")){
-                        result = d
-                        return result
-                    }
-                })
-            }))
-
-        }))*/
-
-
-    }
-
-}
-
-function almaCorJavaConcept(conceptUri) {
-    return $.ajax({
-        url: almaBaseURL + '/api/concepts/' + conceptUri + '/',
-        type: "GET",
-        dataType: "json",
-        success: function (response) {
-            result = response
-        },
-        complete: function (response) {
-
-        }
-    })
-}
-
-function almaProgConcept(conceptUri) {
-    return $.ajax({
-        url: almaBaseURL + '/api/concepts/' + conceptUri + '/',
-        type: "GET",
-        dataType: "json",
-        success: function (response) {
-            result = response
-        },
-        complete: function (response) {
-
-        }
-    })
-}
 
 async function querySPARQL(currentNode) {
     var url = "http://dbpedia.org/sparql";
@@ -1868,7 +1312,7 @@ function wrap(text, width) {
             timeToBreak = false;
         tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em")
         while (word = words.pop()) {
-            if (lineNumber === 15) {
+            if (lineNumber === 20) {
                 timeToBreak = true
 
             }
@@ -1897,6 +1341,3 @@ function wrap(text, width) {
         }
     });
 }
-
-
-

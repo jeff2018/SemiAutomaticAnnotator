@@ -134,6 +134,7 @@ function removeHighlightWords(d) {
 function fillSelecters(){
     schemeConceptsArray.forEach(function(scheme){
         $("#schemeList").append($('<option value="' + scheme.uri + '">' + scheme.title + '</option>'));
+        $('#schemeList').selectpicker('refresh');
 
         var optgroup = $('<optgroup data-uri="' + scheme.uri + '" label="' + scheme.title + '">');
 
@@ -144,7 +145,7 @@ function fillSelecters(){
             optgroup.append($('<option value="' + conceptURI + '" data-scheme="' + concept.scheme + '">' + concept.label + '</option>'));
         });
         $("#concepts").append(optgroup);
-
+        $("#concepts").selectpicker('refresh');
     })
 
 }

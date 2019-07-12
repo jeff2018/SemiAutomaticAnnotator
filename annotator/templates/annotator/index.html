@@ -7,6 +7,10 @@
     <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.4.0/css/bootstrap4-toggle.min.css"
           rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/css/select2.min.css" rel="stylesheet"/>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css">
+    <link href="https://vjs.zencdn.net/7.5.5/video-js.css" rel="stylesheet">
+
 
     <!-- <script type="text/javascript" src="/static/js/jquery.filedrop.js"></script>
      <script type="text/javascript" src="/static/js/upload.js"></script>-->
@@ -61,8 +65,13 @@
             <div class="vfill pdfContainer" id="pdfContainer">
                 <div id="pdfView" class="vfill pdfPlaceholder">
                     <div class="inner-content">
-                        <button id="upload-button" class="btn btn-danger">Select PDF</button>
+                        <div class="button-group d-flex ">
+                            <button id="upload-button" class="btn btn-danger">Select PDF</button>
 
+                            <div class='form-group'>
+                                <select id='schemeList' class="selectpicker" title="Select a scheme"></select>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -71,7 +80,7 @@
     </div>
 
     <div class="col no-gutters">
-        <div class="overlay vfill">
+        <div class="overlay-loader vfill">
             <div class="centered">
                 <div id="loader"></div>
                 <p id="loadingtext">Content loading</p>
@@ -93,7 +102,7 @@
         </div>
     </div>
     <form id="submit-form" name="file" enctype="multipart/form-data">{% csrf_token %}
-        <input type=file name=file id="file-to-upload" class="uploader" accept="application/pdf, text/*"/>
+        <input type=file name=file id="file-to-upload" class="uploader" accept="application/pdf, text/*, video/mp4"/>
         <input id="submit-input" class="uploader" type=button value=Upload>
 
     </form>
@@ -118,7 +127,10 @@
 <script src="https://kit.fontawesome.com/a6813ad4bf.js"></script>
 <script src="https://d3js.org/d3.v5.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js?skin=sons-of-obsidian"></script>
+<script src='https://vjs.zencdn.net/7.5.5/video.js'></script>
+    <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
 
 
 <script src="../static/js/pdf.js"></script>
@@ -127,7 +139,7 @@
 
 <script type="text/javascript" src="../static/js/bubblegraph.js"></script>
 <script type="text/javascript" src="../static/js/codesnippet_graph.js"></script>
-
+<script type="text/javascript" src="../static/js/timeline.js"></script>
 <script type="text/javascript" src="../static/js/renderer.js"></script>
 <script type="text/javascript" src="../static/js/main.js"></script>
 

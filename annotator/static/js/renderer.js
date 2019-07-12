@@ -6,10 +6,11 @@ var pdfPath = null,
     pageNumPending = null,
     totalPages = null,
     canvas = null,
-    ctx = null
+    ctx = null,
+    schemeListValue=null
 
 var container = document.getElementsByClassName("pdfContainer");
-
+var duration =0
 var schemeConceptsMap = {},
     tagMap = {},
     schemeConceptsArray = [];
@@ -229,7 +230,9 @@ $(function () {
 
 // When user chooses a PDF file
     $("#file-to-upload").on('change', function () {
-
+        console.log($('#schemeList').val())
+        schemeListValue = $('#schemeList').val().split(":")[0]
+        console.log(schemeListValue)
         if ($("#file-to-upload").get(0).files[0].name.endsWith('.java')) {
             var javaFile = $("#file-to-upload").get(0).files[0]
 
@@ -242,12 +245,44 @@ $(function () {
 
 
         }
+
+        if ($("#file-to-upload").get(0).files[0].name.endsWith('.mp4')) {
+            var videoFile = $("#file-to-upload").get(0).files[0]
+
+            console.log(videoFile)
+
+            var fileUrl = URL.createObjectURL(videoFile)
+            /*video.src({
+                type: videoFile.type,
+                src: fileUrl
+            })
+            video.load()*/
+
+            //placeFileContent(document.getElementById('java-content'),javaFile)
+            $('#navbarPdf').remove()
+            $('#pdfContainer').replaceWith('<div id="videoView" class="inner-video" style="overflow-y:auto"></div>')
+            //console.log()
+            $('#videoView').append('<video id="my-video" class="video-js " controls preload=\'auto\'  data-setup=\'{}\' > <source id="videoMP4" type="'+videoFile.type+'" src="'+fileUrl+'" >    <p class=\'vjs-no-js\'>         To view this video please enable JavaScript, and consider upgrading to a web browser that        <a href=\'https://videojs.com/html5-video-support/\' target=\'_blank\'>supports HTML5 video</a>    </p></video>')
+            var video = videojs("my-video");
+            console.log(video)
+            $('.leftside').append('<div id="timelineDiv" class="timeline-content"></div>')
+            video.load()
+            var vid = document.getElementById("my-video_html5_api");
+            vid.preload = 'metadata';
+            console.log(vid)
+            vid.addEventListener('loadedmetadata', function () {
+                duration = Math.round(vid.duration);
+                console.log(duration)
+            })
+
+            drawTimeline()
+
+        }
         // Validate whether PDF
         /*if (['application/pdf'].indexOf($("#file-to-upload").get(0).files[0].type) == -1) {
             alert('Error : Not a PDF');
             return;
         }*/
-        console.log("call on change")
         $("#upload-button").hide();
 
         // Send the object url of the pdf
@@ -330,7 +365,8 @@ function askToProcess(file) {
     console.log(file)
     var data = {
         "id": file.id,
-        "name":file.filename
+        "name":file.filename,
+        "duration":duration
     }
     return $.ajax({
         type: "POST",
@@ -344,7 +380,7 @@ function askToProcess(file) {
         processData: false,
         async: true,
         beforeSend: function () {
-            $('.overlay').show();
+            $('.overlay-loader').show();
 
         },
         success: function (response) {
@@ -364,7 +400,8 @@ function askToProcess(file) {
 function retrieveAnnotations(file) {
     var data = {
         "id": file.id,
-        "name": file.filename
+        "name": file.filename,
+        "scheme":schemeListValue
     }
     return $.ajax({
         type: "POST",
@@ -381,7 +418,7 @@ function retrieveAnnotations(file) {
             console.log(response)
         },
         complete: function (response) {
-            $('.overlay').hide();
+            $('.overlay-loader').hide();
             $('.inner-div').show()
             console.log(response)
             console.log(response.responseJSON)
@@ -402,32 +439,7 @@ function retrieveAnnotations(file) {
     })
 }
 
-function initGraph(data1) {
-    document.getElementById("btn_bubblegraph").click()
 
-    drawBubbleGraph(data)
-
-
-}
-
-function openGraph(evt, graphName) {
-
-    console.log("opengraph", evt, graphName)
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-    document.getElementById(graphName).style.display = "block";
-
-    evt.currentTarget.className += " active";
-
-
-}
 
 function ontologyReset() {
 
@@ -472,6 +484,9 @@ function downloadTagsByScheme(scheme, remainingSchemes, finalCallback) {
         dataType: "json",
         success: function (data) {
             //console.log(data)ß
+            $("#schemeList").append($('<option value="' + scheme.uri + '">' + scheme.title + '</option>'));
+            $('#schemeList').selectpicker('refresh');
+
             schemeConceptsMap[scheme.uri] = {'title': scheme.title, 'concepts': []}
             var map = {'title': scheme.title, 'concepts': [], 'uri': scheme.uri}
             for (var i = 0; i < data.length; i++) {

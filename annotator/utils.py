@@ -1,6 +1,7 @@
 from .models import *
 import os
 import json
+from .speechmatics import transcribe
 from .graph import graph
 from .annotation import spotlight,babelfy
 from .codeAnnotation import execute_java,AnnotatorMain
@@ -17,6 +18,15 @@ def saveResource(file,destination):
             resource = PDF(name=file,filepath=destination,nbrOfPages=1)
             resource.save()
 
+    if file.endswith('.mp4'):
+        print("file is a video.")
+        pdf_exist = Video.objects.filter(name=file).exists()
+        if pdf_exist:
+            resource = Video.objects.get(name=file)
+        else:
+            resource = Video(name=file,filepath=destination,duration=1)
+            resource.save()
+
     if file.endswith('.java') or file.endswith('.c'):
         print("file is a codesnippet")
         cs_exist = CodeSnippet.objects.filter(name=file).exists()
@@ -28,6 +38,21 @@ def saveResource(file,destination):
 
 
     return resource
+
+def processVideo(file):
+    annotations_exist = VideoAnnotation.objects.filter(video_id=file.id).exists()
+    if not annotations_exist:
+        filepath = file.filepath
+        folder = "/Users/jeff/PycharmProjects/SAAnnotator/upload/video_" + str(file.id) + "/"
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        if not file.transcriptionFile:
+            transcribedFile, transcibedJson = transcribe(filepath,folder)
+            file.transcriptionFile = transcribedFile
+            file.timestampFile = transcibedJson
+            file.save()
+        print("no trans requierd")
+
 
 
 def processCS(file):
@@ -183,6 +208,10 @@ def retrieveAnnotations(file):
 
 
 
+
+
+
+
 def uriToLabel(uri):
     label = uri.split(':')[1]
     return label
@@ -199,11 +228,11 @@ def analysis(text):
     topTen = graphResults[:10]
     for t in topTen:
         t['frequency'] = 0
-        print("t ", t)
+        #print("t ", t)
         if t['camino'] == 'False':
-            print("camino false")
+            #print("camino false")
             for i in initialConcepts:
-                print("i ", i)
+                #print("i ", i)
                 ending = i[0].rsplit('/', 1)[1]
                 resource = "dbr:" + ending
 
@@ -213,14 +242,14 @@ def analysis(text):
                     t['frequency'] = freq
     for t in topTen:
         if t['camino'] == 'True':
-            print("camino true")
+            #print("camino true")
 
             oldSources = t['sources']
             t['sources'] = [s['label'] for s in topTen if s['label'] in oldSources]
             newSources = t['sources']
 
             for s in topTen:
-                print("s ", s)
+                #print("s ", s)
                 if s['label'] in newSources:
                     t['frequency'] += s['frequency']
             if len(t['sources']) != 0:
