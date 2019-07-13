@@ -11,6 +11,7 @@ var xScale2 = null
 var height2 = null
 var heighttl = null
 var colorScale = d3.scaleOrdinal(d3.schemeCategory10)
+var drawn = false
 
 function drawTimeline(duration) {
 
@@ -182,7 +183,7 @@ function drawTimeline(duration) {
 
     function brushed() {
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-
+        console.log("brushed zo")
         var s = d3.event.selection || xScale2.range();
         var s_map = s.map(xScale2.invert, xScale2)
 
@@ -324,11 +325,15 @@ function newBrush() {
         .on("start", brushstart)
         .on("brush", brushed)
         .on("end", brushend);
-
     brushes.push({id: brushes.length, brush: brush});
 
     function brushstart() {
         // Brush start here
+        console.log("start drawing")
+        var brushFocus = gBrushes.select("#" + this.id)
+
+        brushFocus.selectAll('.overlay').attr("height", heighttl)
+        brushFocus.selectAll('.selection').attr("height", heighttl)
 
     };
 
@@ -344,13 +349,14 @@ function newBrush() {
 
         if (!d3.event.sourceEvent) return;
         if (!d3.event.sourceEvent.srcElement) return;
+
         //console.log(d3.event.sourceEvent.srcElement.parentNode)
         //console.log((this))
         //console.log(d3.event.sourceEvent)
         //console.log(d3.event)
         //console.log(d3.event.sourceEvent.srcElement.parentNode)
         let selection = d3.event.selection.map(xScale.invert);
-
+        console.log("brushed")
         mySelections[this.id] = {start: selection[0], end: selection[1]};
 
 
@@ -385,7 +391,24 @@ function newBrush() {
             d1[0] = d3.timeSecond.floor(d0[0]);
             d1[1] = d3.timeSecond.offset(d1[0]);
         }
+        if (focusNode) {
+            brushes[lastBrushID].nodeID = focusNode.id
+            brushes[lastBrushID].uri = focusNode.uri
+            if (selection) {
+                brushes[lastBrushID].start = selection[0]
+                brushes[lastBrushID].endpoint = selection[1]
+                focusNode.timestamps.push(selection)
+                focusNode.nbrmentions = focusNode.timestamps.length
+            }
 
+
+        }
+
+        console.log(focusNode)
+        console.log(brushes[lastBrushID])
+
+        console.log(lastBrush)
+        console.log(selection)
         d3.select(this).transition().call(d3.event.target.move, d1.map(xScale));
         brushContext.transition().call(d3.event.target.move, d1.map(xScale2));
         brushContext.on('.brush', null);
@@ -478,17 +501,17 @@ function drawBrushes() {
                 .selectAll('.overlay')
                 .style('pointer-events', function () {
                     var brush = brushObject.brush;
-                    if (focusNode){
-                          if (brushObject.id === brushes.length - 1 && brush !== undefined) {
-                        console.log("all")
+                    if (focusNode) {
+                        if (brushObject.id === brushes.length - 1 && brush !== undefined) {
+                            // console.log("all")
 
-                        return 'all';
+                            return 'all';
+                        } else {
+                            //console.log("none")
+
+                            return 'none';
+                        }
                     } else {
-                        console.log("none")
-
-                        return 'none';
-                    }
-                    }else{
                         return 'none'
                     }
 
@@ -499,7 +522,7 @@ function drawBrushes() {
                 .style('fill', function (d) {
                     if (brushObject.hasOwnProperty("nodeID")) {
                         let circle = d3.select("circle[id='c_" + brushObject.nodeID + "']")
-                        console.log(circle)
+                        //console.log(circle)
 
 
                         var color = circle.attr("fill_value")
@@ -595,7 +618,16 @@ function drawBrushes2() {
 
             d3.select(this).selectAll('.selection')
                 .style('fill', function (d) {
-                    return colorScale(brushObject.id)
+                    if (brushObject.hasOwnProperty("nodeID")) {
+                        let circle = d3.select("circle[id='c_" + brushObject.nodeID + "']")
+                        //console.log(circle)
+
+
+                        var color = circle.attr("fill_value")
+
+
+                        return color
+                    }
                 })
             d3.select(this).selectAll('.overlay').attr("height", height2)
             d3.select(this).selectAll('.selection').attr("height", height2)
@@ -637,7 +669,10 @@ function makeBrush(time, d) {
     brushes.push({id: brushes.length, brush, start: start, endpoint: end, nodeID: d.id, uri: d.uri});
 
     function brushstart() {
-        // Brush start here
+        var brushFocus = gBrushes.select("#" + this.id)
+
+        brushFocus.selectAll('.overlay').attr("height", heighttl)
+        brushFocus.selectAll('.selection').attr("height", heighttl)
 
     };
 
@@ -653,6 +688,7 @@ function makeBrush(time, d) {
         brushFocus.selectAll('.selection').attr("height", heighttl)
         if (!d3.event.sourceEvent) return;
         if (!d3.event.sourceEvent.srcElement) return;
+
         //console.log(d3.event.sourceEvent.srcElement.parentNode)
         let selection = d3.event.selection.map(xScale.invert);
 

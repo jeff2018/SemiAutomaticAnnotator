@@ -223,7 +223,6 @@ svg {
 
 .ticks {
     font-size: 10px;
-    stroke:white;
 }
 
 .track,
@@ -233,13 +232,13 @@ svg {
 }
 
 .track {
-    stroke: white;
+    stroke: #000;
     stroke-opacity: 0.3;
     stroke-width: 10px;
 }
 
 .track-inset {
-    stroke: red;
+    stroke: #dcdcdc;
     stroke-width: 8px;
 }
 
@@ -257,5 +256,11 @@ svg {
 }
 .brush .selection {
     stroke: #000;
-    fill: red;
+    fill: gray;
+}
+.handle-slider {
+    fill: #fff;
+    stroke: #000;
+    stroke-opacity: 0.5;
+    stroke-width: 1.25px;
 }

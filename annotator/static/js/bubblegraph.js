@@ -1710,6 +1710,8 @@ async function almaRequest(currentNode) {
     var conceptUri = currentNode.uri
     var result
 
+    console.log(conceptUri)
+
     if (conceptUri.includes("c:") || conceptUri.includes("java:")) {
 
         var resp = await almaCorJavaConcept(conceptUri)

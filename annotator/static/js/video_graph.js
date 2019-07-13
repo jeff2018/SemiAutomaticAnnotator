@@ -20,6 +20,8 @@ var svg = d3.select("#svg_bubblegraph"),
 console.log(centerX, centerY)
 
 var color = d3.scaleSequential(d3.interpolateRainbow);
+
+var color2 = d3.scaleSequential(d3.interpolateSpectral)
 var colorPage = d3.scaleOrdinal(d3.schemeCategory10);
 
 
@@ -165,7 +167,7 @@ function drawVideoGraph(data) {
             }
             await moveToCenter(d)
         })
-        .on("mouseover", function (d) {
+        /*.on("mouseover", function (d) {
 
             var color
             if (d.nbrmentions == 0) {
@@ -179,7 +181,7 @@ function drawVideoGraph(data) {
 
             var color = defineColorVideo(d)
 
-        })
+        })*/
 
         .call(
             d3.drag()
@@ -290,7 +292,7 @@ function drawVideoGraph(data) {
                 //  console.log("as en pagearc")
                 return;
             }
-            if (target.closest(".fa") || target.closest("#nextPage") || target.closest("#prevPage") || target.closest("#selectbox") || target.closest("#concepts") || target.closest("#schemeList") || target.closest("#addAnnotationsButton")) {
+            if (target.closest(".fa") || target.closest("#nextPage") || target.closest("#prevPage") || target.closest("#selectbox") || target.closest("#concepts") || target.closest("#schemeList") || target.closest("#addAnnotationsButton") || target.closest(".filter-option-inner") || target.closest(".overlay") || target.closest(".brushes")) {
 
                 return;
             }
@@ -304,8 +306,8 @@ function drawVideoGraph(data) {
                     "frequency": 1,
                     "name": "New_Concept",
                     "nbrmentions": 0,
-                    "time": [],
-                    "r": 45,
+                    "timestamps": [],
+                    "r": 40,
                     "associatedLinks": [],
                     "associatedNodes": [],
                     "x": 0,
@@ -346,15 +348,10 @@ function drawVideoGraph(data) {
                             if (focusNode.nbrmentions === 0) {
                                 return "lightgrey";
                             } else {
-                                var value
-                                var i = parseFloat("0." + focusNode.index)
-                                if (isEven(focusNode.index)) {
-                                    value = i
-                                } else {
-                                    value = 1.0 - i
-                                }
+                                console.log("fill")
 
-                                return color(value)
+                                var c = defineColorVideo(focusNode)
+                                return c
                             }
                         });
                         if (focusNode.edited) {
@@ -457,7 +454,7 @@ function drawVideoGraph(data) {
             .attr('r', 0)
             .attr("class", "circle")
             .attr("fill_value", function (d) {
-                if (d.nbrmentions == 0) {
+                if (d.nbrmentions == 0 && d.edited) {
                     return "lightgrey";
                 } else {
 
@@ -657,15 +654,10 @@ function drawVideoGraph(data) {
                             if (lastNode.nbrmentions === 0) {
                                 return "lightgrey";
                             } else {
-                                var value
-                                var i = parseFloat("0." + lastNode.index)
-                                if (isEven(lastNode.index)) {
-                                    value = i
-                                } else {
-                                    value = 1.0 - i
-                                }
+                                console.log("fill")
 
-                                return color(value)
+                                var c = defineColorVideo(lastNode)
+                                return c
                             }
                         })
                         console.log(lastNode.edited)
@@ -1054,9 +1046,7 @@ function drawVideoGraph(data) {
         text.text(function (d) {
             return conceptName
         })
-
-        focusNode.nbrmentions = maxFreq
-        focusNode.edited = true
+        focusNode.edited = false
         focusNode.fx = null;
         focusNode.fy = null;
 
@@ -1069,23 +1059,38 @@ function drawVideoGraph(data) {
                     focusNode.r = ir(t)
                     simulation.force('collide', forceCollide)
                 }
-            }).on('end', () => {
+            }).on('end', async function () {
+            focusNode.uri = valConcept
+            var res = await almaRequest(focusNode)
+            focusNode.uri = res
+            console.log(res)
+            if (!groupArray.includes(res)) {
+                groupArray.push(res)
+
+            }
+            console.log(groupArray)
+            console.log(focusNode)
             let circle = d3.select("circle[id='c_" + focusNode.id + "']")
             circle.style('fill', function (d) {
-                if (focusNode.nbrmentions === 0) {
+                if (focusNode.nbrmentions === 0 & focusNode.edited) {
                     return "lightgrey";
                 } else {
-                    var value
-                    var i = parseFloat("0." + focusNode.index)
-                    if (isEven(focusNode.index)) {
-                        value = i
-                    } else {
-                        value = 1.0 - i
-                    }
+                    console.log("fill")
 
-                    return color(value)
+                    var c = defineColorVideo(focusNode)
+                    return c
                 }
             });
+            circle.attr("fill_value",function(d){
+                 if (focusNode.nbrmentions === 0 & focusNode.edited) {
+                    return "lightgrey";
+                } else {
+                    console.log("fill")
+
+                    var c = defineColorVideo(focusNode)
+                    return c
+                }
+            })
             if (focusNode.edited) {
                 let image = d3.selectAll("#i1_" + focusNode.id)
                 image.style("visibility", "visible")
@@ -1112,8 +1117,8 @@ function drawVideoGraph(data) {
 
             }
             focusNode.name = conceptName
-            focusNode.uri = valConcept
 
+            console.log(focusNode)
             focusNode = null;
             pageWheel = null;
             infoBox = null;
@@ -1337,7 +1342,7 @@ function drawVideoGraph(data) {
         .call(xAxis);
 
 // drag handle
-    var handle = slider.append('circle').classed('handle', true)
+    var handle = slider.append('circle').classed('handle-slider', true)
         .attr('r', 8);
 
 // this is the bar on top of above tracks with stroke = transparent and on which the drag behaviour is actually called
@@ -1394,9 +1399,28 @@ function drawVideoGraph(data) {
 
 function defineColorVideo(d) {
     var value
-    var index2 = groupArray.indexOf(d.uri)
-    var i = parseFloat("0." + index2)
-    if (isEven(index2)) {
+    var index = groupArray.indexOf(d.uri)
+    var i = parseFloat("0." + index)
+
+    if (index >= 10) {
+        if (index % 10) {
+            index = index + 1
+
+        }
+        else {
+            index = index + 1
+        }
+        if (isEven(index)) {
+            value = i
+        } else {
+            value = 1.0 - i
+        }
+
+        return color2(value)
+
+    }
+
+    if (isEven(index)) {
         value = i
     } else {
         value = 1.0 - i
@@ -1527,7 +1551,7 @@ function wrap2(text, width) {
 async function almaRequest(currentNode) {
     var conceptUri = currentNode.uri
     var result
-
+    console.log(conceptUri)
     if (conceptUri.includes("c:") || conceptUri.includes("java:")) {
 
         var resp = await almaCorJavaConcept(conceptUri)
@@ -1566,6 +1590,7 @@ function almaCorJavaConcept(conceptUri) {
         type: "GET",
         dataType: "json",
         success: function (response) {
+            console.log(response)
             result = response
         },
         complete: function (response) {
@@ -1580,6 +1605,7 @@ function almaProgConcept(conceptUri) {
         type: "GET",
         dataType: "json",
         success: function (response) {
+            console.log(response)
             result = response
         },
         complete: function (response) {
