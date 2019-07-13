@@ -9,6 +9,7 @@ var pageWheel = null;
 var infoBox = null;
 var checkIcon = "../upload/check128.png"
 console.log(width, height)
+var groupArray = []
 
 var svg = d3.select("#svg_bubblegraph"),
     //width = +svg.attr("width"),
@@ -59,18 +60,9 @@ function updateStops(data, i) {
 }
 
 
-function drawCSGraph(data) {
+function drawVideoGraph(data) {
     console.log(data)
     focusNode = null;
-
-
-    var scaleRadius = d3.scaleLinear().domain([0, data.nodes.length]).range([40, 100]);
-    var maxRadiusFocusNode = centerY * 0.75;
-
-    //sort the data according to the averagedegree for the ranking
-    data.nodes.sort(function (a, b) {
-        return a.sequenceRank - b.sequenceRank
-    })
 
 
     /*var maxPerFreqArray = data.nodes.map(d => Math.max.apply(null, d.frequency));
@@ -84,13 +76,20 @@ function drawCSGraph(data) {
         return d.id;
     }))
     console.log(maxID)
-
+    var scaleRadius = d3.scaleLinear().domain([0, maxFreq]).range([40, 100]);
+    var maxRadiusFocusNode = centerY * 0.75;
     //var scaleGradient = d3.scaleLinear().domain([minFrequency, maxFrequency]).range([1, 100])
 
     let pack = d3.pack()
         .size([width, height])
         .padding(1.5);
+    data.nodes.forEach(function (d, i) {
+        if (!groupArray.includes(d.uri)) {
+            groupArray.push(d.uri)
+        }
 
+    })
+    console.log(groupArray)
 
     var forceCollide = d3.forceCollide(d => d.r + 2);
 
@@ -118,11 +117,12 @@ function drawCSGraph(data) {
             radius: nodes.r,
             name: data.label,
             uri: data.uri,
-            nbrmentions: data.lines.length,
-            lines: data.lines,
+            nbrmentions: data.time.length,
+            words: data.words,
             frequency: data.frequency,
             id: data.id,
-            sequenceRank: data.sequenceRank,
+            wiki: data.wiki,
+            timestamps: data.time,
             edited: false
 
         }
@@ -166,31 +166,19 @@ function drawCSGraph(data) {
             await moveToCenter(d)
         })
         .on("mouseover", function (d) {
-            console.log(d)
-            var lines = d.lines
+
             var color
             if (d.nbrmentions == 0) {
                 color = "lightgrey";
             } else {
-                color = defineColor(d)
+                color = defineColorVideo(d)
             }
-            for (var i = 0; i < lines.length; i++) {
-                $(".prettycode ol.linenums > li:nth-child(" + lines[i] + ")").css({
-                    background: color
 
-                })
-            }
         })
         .on("mouseout", function (d) {
-            console.log(d)
-            var lines = d.lines
-            var color = defineColor(d)
-            for (var i = 0; i < lines.length; i++) {
-                $(".prettycode ol.linenums > li:nth-child(" + lines[i] + ")").css({
-                    background: 'transparent'
 
-                })
-            }
+            var color = defineColorVideo(d)
+
         })
 
         .call(
@@ -203,13 +191,25 @@ function drawCSGraph(data) {
         .attr('id', d => "c_" + d.id)
         .attr('r', 0)
         .attr("class", "circle")
+        .attr("fill_value", function (d) {
+            if (d.nbrmentions == 0) {
+                return "lightgrey";
+            } else {
+
+                var c = defineColorVideo(d)
+                return c
+            }
+        })
         .style("stroke-width", 0.5)
         .style("stroke", "black")
         .style('fill', function (d) {
             if (d.nbrmentions == 0) {
                 return "lightgrey";
             } else {
-                return defineColor(d)
+                console.log("fill")
+
+                var c = defineColorVideo(d)
+                return c
             }
         })
         .transition().duration(2000).ease(d3.easeElasticOut)
@@ -263,6 +263,16 @@ function drawCSGraph(data) {
 
             }
         )
+    forcenodedata.forEach(function (d) {
+        var timestamps = d.timestamps
+
+        timestamps.forEach(function (t) {
+            makeBrush(t, d)
+        })
+
+    })
+    console.log(mySelections)
+    console.log(brushes)
     /*
     .each(getSize)
     .style("font-size",function (d) {
@@ -291,10 +301,10 @@ function drawCSGraph(data) {
 
                 var addedNode = {
                     "degree": 1,
-                    "frequency": [],
+                    "frequency": 1,
                     "name": "New_Concept",
                     "nbrmentions": 0,
-                    "lines": [],
+                    "time": [],
                     "r": 45,
                     "associatedLinks": [],
                     "associatedNodes": [],
@@ -316,7 +326,6 @@ function drawCSGraph(data) {
             }
 
             if (!target.closest(".circle") && focusNode) {
-                removeHighlightWords(focusNode)
 
                 focusNode.fx = null;
                 focusNode.fy = null;
@@ -376,6 +385,7 @@ function drawCSGraph(data) {
                         focusNode = null;
                         pageWheel = null;
                         infoBox = null;
+                        drawBrushes()
                         simulation.alphaTarget(0);
                     }).on('interrupt', () => {
                     simulation.alphaTarget(0);
@@ -418,29 +428,10 @@ function drawCSGraph(data) {
                 return 1
 
             }).on("mouseover", function (d) {
-                var lines = d.lines
-                var color
-                if (d.nbrmentions == 0) {
-                    color = "lightgrey";
-                } else {
-                    color = defineColor(d)
-                }
-                for (var i = 0; i < lines.length; i++) {
-                    $(".prettycode ol.linenums > li:nth-child(" + lines[i] + ")").css({
-                        background: color
 
-                    })
-                }
             })
             .on("mouseout", function (d) {
-                var lines = d.lines
-                for (var i = 0; i < lines.length; i++) {
-                    console.log(lines[i])
-                    $(".prettycode ol.linenums > li:nth-child(" + lines[i] + ")").css({
-                        background: 'transparent'
 
-                    })
-                }
             })
 
             .on("click", async function (d) {
@@ -465,6 +456,15 @@ function drawCSGraph(data) {
             .attr('id', d => "c_" + d.id)
             .attr('r', 0)
             .attr("class", "circle")
+            .attr("fill_value", function (d) {
+                if (d.nbrmentions == 0) {
+                    return "lightgrey";
+                } else {
+
+                    var c = defineColorVideo(d)
+                    return c
+                }
+            })
             .style("stroke-width", 0.5)
             .style("stroke", "black")
             .style('fill', function (d) {
@@ -474,7 +474,7 @@ function drawCSGraph(data) {
                     }
                     return "lightgrey";
                 } else {
-                    return defineColor(d)
+                    return defineColorVideo(d)
                 }
             })
         nodeEnter.append('text')
@@ -724,6 +724,7 @@ function drawCSGraph(data) {
                 if (currentNode.name !== "New_Concept") {
 
                     drawInfoBox(currentNode)
+                    drawBrushes()
 
                 } else {
                     drawEditBox(currentNode)
@@ -731,6 +732,7 @@ function drawCSGraph(data) {
                     $("#addAnnotationsButton").click(function () {
                         updateConcept()
                     })
+
                 }
 
             })
@@ -1349,13 +1351,13 @@ function drawCSGraph(data) {
 
 
 // initial transition
-    slider.transition().duration(750)
-        .tween("drag", function () {
-            var i = d3.interpolate(0, initialValue);
-            return function (t) {
-                dragSlider(xScale(i(t)));
-            }
-        });
+    /*  slider.transition().duration(750)
+          .tween("drag", function () {
+              var i = d3.interpolate(0, initialValue);
+              return function (t) {
+                  dragSlider(xScale(i(t)));
+              }
+          });*/
 
     function dragSlider(value) {
 
@@ -1390,11 +1392,11 @@ function drawCSGraph(data) {
 
 }
 
-function defineColor(d) {
-    //console.log(d)
+function defineColorVideo(d) {
     var value
-    var i = parseFloat("0." + d.index)
-    if (isEven(d.index)) {
+    var index2 = groupArray.indexOf(d.uri)
+    var i = parseFloat("0." + index2)
+    if (isEven(index2)) {
         value = i
     } else {
         value = 1.0 - i

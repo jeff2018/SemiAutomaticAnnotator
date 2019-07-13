@@ -91,24 +91,25 @@ def processTxtFile(request):
         data = json.loads(request.body)
         fileid = data['id']
         filename = data['name']
+        scheme = data['scheme']
         print(data)
 
         if filename.endswith('.pdf'):
             file = PDF.objects.get(id=fileid)
 
-            res = retrieveAnnotations(file)
+            res = retrieveAnnotations(file,scheme)
             return JsonResponse(res)
 
         if filename.endswith('.mp4'):
             file = Video.objects.get(id=fileid)
 
-            #res = retrieveAnnotations(file)
-            #return JsonResponse(res)
+            res = retrieveAnnotations(file,scheme)
+            return JsonResponse(res)
 
 
         if filename.endswith('.java') or filename.endswith('.c'):
             file = CodeSnippet.objects.get(id=fileid)
-            res = retrieveAnnotations(file)
+            res = retrieveAnnotations(file,scheme)
 
 
             return JsonResponse(res)

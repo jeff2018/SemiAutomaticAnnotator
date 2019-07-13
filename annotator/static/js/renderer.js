@@ -275,7 +275,7 @@ $(function () {
                 console.log(duration)
             })
 
-            drawTimeline()
+
 
         }
         // Validate whether PDF
@@ -428,6 +428,12 @@ function retrieveAnnotations(file) {
             //document.getElementById("btn_bubblegraph").click();
             if(filename.endsWith('.pdf')){
                 drawBubbleGraph(res)
+
+            }
+             if(filename.endsWith('.mp4')){
+                drawVideoGraph(res)
+                drawTimeline(duration)
+
 
             }
             if(filename.endsWith('.java') || filename.endsWith('.c')) {

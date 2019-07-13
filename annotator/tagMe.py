@@ -11,13 +11,14 @@ token = "28b822b0-7839-45d0-bec3-4510a2dd72ca-843339462"
 tagMeURL = "https://tagme.d4science.org/tagme/tag"
 
 
-jsonFile2 = open('mappingSchemes.json')
+jsonFile2 = open('/Users/jeff/PycharmProjects/SAAnnotator/annotator/mappingSchemes.json')
 mapping= json.load(jsonFile2)
-f = open("transcrption_ForLoop.txt")
-jsonTranscript = open('ForLoop-2.json')
-transcript = json.load(jsonTranscript)
-
-text = f.read()
+#f = open("transcrption_ForLoop.txt")
+#jsonTranscript = open('ForLoop-2.json')
+#transcript = json.load(jsonTranscript)
+transcript=""
+text=""
+#text = f.read()
 tagme.GCUBE_TOKEN = token
 
 
@@ -112,6 +113,7 @@ def getDBPediaResource(spots):
 def mapToAlma(scheme,spottings):
     almaConcepts=[]
     print("---ALMA---")
+    print(mapping)
     map = mapping[scheme]
     for s in spottings:
         for m in map:
@@ -151,7 +153,7 @@ def filterWords(spottings):
                         index=index+1
         s['words'] = [x for x in words if x not in badwords]
 
-def addTimeStamp(spottings):
+def addTimeStamp(spottings,timestampmap):
     for s in spottings:
         words = s['words']
         s['time']=[]
@@ -160,20 +162,20 @@ def addTimeStamp(spottings):
                 wordArray = w.split(" ")
                 wordLength = len(wordArray)
                 firstWord = wordArray[0]
-                for i, t in enumerate(transcript['words']):
+                for i, t in enumerate(timestampmap['words']):
                     n = t['name']
                     time = float(t['time'])
                     if n == firstWord:
                         print(firstWord)
                         nextWord = wordArray[wordLength-1]
-                        nextElement = transcript['words'][i+1]
+                        nextElement = timestampmap['words'][i+1]
                         if nextWord == nextElement['name']:
                             print(nextWord)
                             time = int(round(time))
                             s['time'].append(time)
 
             else:
-                for i, t in enumerate(transcript['words']):
+                for i, t in enumerate(timestampmap['words']):
                     n = t['name']
                     time = float(t['time'])
                     if n == w:
@@ -187,21 +189,29 @@ def addTimeStamp(spottings):
     return
 
 
+def getAnnotations(file,scheme):
+    results=[]
+    print(file,scheme)
+    print(file.transcriptionFile)
+    print(file.timestampFile)
 
-spottings = tagMe(text)
-getDBPediaResource(spottings)
-for s in spottings:
-    print(s)
-mappedALMA =mapToAlma('java',spottings)
-filterWords(mappedALMA)
+    transcription = file.transcriptionFile
+    timestamp = file.timestampFile
+    f = open(transcription)
+    text = f.read()
+    jsonTranscript = open(timestamp)
+    timestampmap = json.load(jsonTranscript)
+    spottings = tagMe(text)
+    getDBPediaResource(spottings)
 
-print(transcript['words'])
 
-for t in transcript['words']:
-    w = t['name']
-    time = t['time']
-    print(w,time)
+    mappedALMA =mapToAlma(scheme,spottings)
+    filterWords(mappedALMA)
 
-addTimeStamp(mappedALMA)
-for m in mappedALMA:
-   print(m)
+
+
+    addTimeStamp(mappedALMA,timestampmap)
+    for m in mappedALMA:
+       print(m)
+    results = mappedALMA
+    return results

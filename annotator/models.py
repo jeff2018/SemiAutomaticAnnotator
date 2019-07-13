@@ -63,7 +63,7 @@ class PageAnnotation(Annotation):
 class VideoAnnotation(Annotation):
     video = models.ForeignKey(Video, on_delete=models.CASCADE,null=True)
     URI = models.CharField(max_length=255,null=True)
-    camino = models.NullBooleanField()
+    wikilink =  models.CharField(max_length=255,null=True)
 
 
 class CodeAnnotation(Annotation):
@@ -71,7 +71,8 @@ class CodeAnnotation(Annotation):
     sequenceRank = models.PositiveIntegerField(null=True)
 
 class timestamp(models.Model):
-    time = models.PositiveIntegerField()
+    starttime = models.PositiveIntegerField(null=True)
+    endtime = models.PositiveIntegerField(null=True)
     videoAnnotation = models.ForeignKey(VideoAnnotation,on_delete=models.CASCADE,null=True)
 
 class mappedWords(models.Model):

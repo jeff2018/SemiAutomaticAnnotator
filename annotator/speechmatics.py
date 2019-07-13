@@ -114,7 +114,7 @@ def transcribe(filePath,outputPath):
     video_File = "/Users/jeff/PycharmProjects/AnnotateFiles/Video_Files/04_jeffersons-great-contribution.mp4"
     language = 'en-US'
     client= SpeechmaticsClient(api_user_id,api_token,base_url)
-    filePath= "/Users/jeff/PycharmProjects/AnnotateFiles/Video_Files/zero.wav"
+    #filePath= "/Users/jeff/PycharmProjects/AnnotateFiles/Video_Files/zero.wav"
     base = os.path.basename(filePath)
     myFileName, myFileExt = os.path.splitext(base)
 

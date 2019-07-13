@@ -2,6 +2,7 @@ from .models import *
 import os
 import json
 from .speechmatics import transcribe
+from .tagMe import getAnnotations
 from .graph import graph
 from .annotation import spotlight,babelfy
 from .codeAnnotation import execute_java,AnnotatorMain
@@ -110,7 +111,7 @@ def processCS(file):
 
 
 
-def retrieveAnnotations(file):
+def retrieveAnnotations(file,scheme):
     if file:
         print("id of file: " + str(file.id))
 
@@ -184,6 +185,59 @@ def retrieveAnnotations(file):
             combined_dict = {"nodes":list(dict),"links":list(dict_links),"pages":file.nbrOfPages,"filename": file.name, "id": file.id}
 
             return combined_dict
+
+        if myFileExt.lower() =='.mp4':
+            annotations_exist = VideoAnnotation.objects.filter(video_id=file.id).exists()
+            if not annotations_exist:
+                concepts = getAnnotations(file,scheme)
+                for c in concepts:
+                    con_uri = c['concept']
+                    concept_exist = Concept.objects.filter(uri=con_uri).exists()
+                    if not concept_exist:
+                        concept = Concept(uri=con_uri, label=c['label'], group="1")
+                        concept.save()
+                    else:
+                        concept = Concept.objects.get(uri=con_uri)
+                    va = VideoAnnotation(video_id=file.id,concept_id=concept.id, URI=c['URI'],frequency=len(c['time']),wikilink=c['wiki'])
+                    va.save()
+                    words = c['words']
+                    for w in words:
+                        mw = mappedWords(word=w,videoAnnotation_id=va.id)
+                        mw.save()
+                    time = c['time']
+                    for t in time:
+                        ts = timestamp(starttime=t, endtime=t+1,videoAnnotation_id=va.id)
+                        ts.save()
+            annotations = VideoAnnotation.objects.filter(video_id=file.id).values('concept_id').distinct()
+            videoConcepts = Concept.objects.filter(id__in=annotations).values()
+            dict =videoConcepts
+            for d in dict:
+                print(d)
+                va = VideoAnnotation.objects.get(concept_id=d['id'], video_id=file.id)
+                d['frequency'] = va.frequency
+                d['wiki']= va.wikilink
+                d['uri']=va.URI
+                d['words']=[]
+                d['time']=[]
+                words = mappedWords.objects.filter(videoAnnotation=va.id)
+                for w in words:
+                    d['words'].append(w.word)
+
+                timestamps = timestamp.objects.filter(videoAnnotation=va.id)
+                for t in timestamps:
+                    start = t.starttime
+                    end = t.endtime
+                    domainrange =[]
+                    domainrange.append(start)
+                    domainrange.append(end)
+                    d['time'].append(domainrange)
+            combined_dict = {"nodes": list(dict), "filename": file.name, "id": file.id}
+            print(combined_dict)
+            return combined_dict
+
+
+
+
 
 
         if myFileExt.lower() =='.java' or myFileExt.lower() =='.c':

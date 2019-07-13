@@ -1,5 +1,18 @@
+var initialBrushesDrawn = false
+var initialBrushesDrawn2 = false
 
-function drawTimeline() {
+var mySelections = {}
+var brushCount = 100;
+var brushes = [];
+var gBrushes = null
+var gBrushesContext = null
+var xScale = null
+var xScale2 = null
+var height2 = null
+var heighttl = null
+var colorScale = d3.scaleOrdinal(d3.schemeCategory10)
+
+function drawTimeline(duration) {
 
     var $this = $('.timeline-content'); // targeted div
     console.log($this)
@@ -10,13 +23,10 @@ function drawTimeline() {
         margin2 = {top: 175, right: 15, bottom: 50, left: 15},
 
         width = widthtc - margin.left - margin.right,
-        height = heighttc - margin.top - margin.bottom,
-        height2 = heighttc - margin2.top - margin2.bottom;
+        height = heighttc - margin.top - margin.bottom
+    height2 = heighttc - margin2.top - margin2.bottom;
 
-    var mySelections = {}
-    var brushCount = 40;
-    var brushes = [];
-
+    heighttl = height
 // Zoom
     var zoom = d3.zoom()
         .extent([[0, 0], [width, height]])
@@ -26,12 +36,12 @@ function drawTimeline() {
 
 // Scale
 
-    var xScale = d3.scaleTime()
-        .domain([0, 137 * 1000])//domain of [00:00 - 02:17] in seconds
+    xScale = d3.scaleTime()
+        .domain([0, duration * 1000])//domain of [00:00 - 02:17] in seconds
         .range([0, width]);
 
-    var xScale2 = d3.scaleTime()
-        .domain([0, 137 * 1000])//domain of [00:00 - 02:17] in seconds
+    xScale2 = d3.scaleTime()
+        .domain([0, duration * 1000])//domain of [00:00 - 02:17] in seconds
         .range([0, width]);
 
 // Axis
@@ -101,21 +111,21 @@ function drawTimeline() {
         .attr("transform", "translate(0," + height2 + ")")
         .call(xAxis2);
 
-    var gBrushes = focus.append('g')
+    gBrushes = focus.append('g')
         .attr("height", height)
         .attr("width", width)
         .attr("fill", "none")
         .attr("transform", "translate(" + 0 + "," + 0 + ")")
         .attr("class", "brushes");
 
-    var gBrushesContext = context.append('g')
+    gBrushesContext = context.append('g')
         .attr("height", height2)
         .attr("width", width)
         .attr("fill", "none")
         .attr("transform", "translate(" + 0 + "," + 0 + ")")
         .attr("class", "brushesContext");
 
-    var brushcontext = context.append("g")
+    brushcontext = context.append("g")
         .attr("class", "brushContext")
         .call(brush)
         .call(brush.move, [xScale(0 * 1000), xScale(30 * 1000)])
@@ -125,7 +135,7 @@ function drawTimeline() {
         }) // Treat overlay interaction as move.
         .on("mousedown touchstart", brushcentered); // Recenter before brushing.
 
-    var sliderwidth =context.select(".selection").attr("width")
+    var sliderwidth = context.select(".selection").attr("width")
     d3.select('.brushContext').selectAll('.selection').style("cursor", "initial");
     d3.select('.brushContext').selectAll('.overlay').style("cursor", "initial");
 
@@ -138,10 +148,7 @@ function drawTimeline() {
         .attr("height", height2)
         .style("fill", "none")
 
-    var initialBrushesDrawn = false
-    var initialBrushesDrawn2 = false
 
-    var colorScale = d3.scaleOrdinal(d3.schemeCategory10)
     var ticks = context.selectAll(".tick text");
 
 // Only display a tick-label if second is dividable by 5
@@ -150,8 +157,8 @@ function drawTimeline() {
         var s = formatSeconds(d)
         if (s % 10 !== 0) d3.select(this).remove();
     });
-    console.log(brushes)
-    console.log(mySelections)
+    //console.log(brushes)
+    //console.log(mySelections)
 
     function zoomed() {
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
@@ -221,18 +228,6 @@ function drawTimeline() {
     }
 
 
-    function hmsToSecondsOnly(str) {
-        var p = str.split(':'),
-            s = 0, m = 1;
-
-        while (p.length > 0) {
-            s += m * parseInt(p.pop(), 10);
-            m *= 60;
-        }
-
-        return s;
-    }
-
     function brushended() {
         if (!d3.event.sourceEvent) return; // Only transition after input.
         if (!d3.event.selection) return; // Ignore empty selections.
@@ -267,234 +262,288 @@ function drawTimeline() {
     }*/
 
 
-    function newBrush() {
-        //console.log('newBrush')
-        var brush = d3.brushX()
-            .extent([[0, 0], [width, height]])
+    /*
+        let toggle = true;
 
-            .on("start", brushstart)
-            .on("brush", brushed)
-            .on("end", brushend);
+        document.getElementById('disable-btn').addEventListener('click', () => {
+            toggleBrush();
+        });
 
-        brushes.push({id: brushes.length, brush: brush});
+        var toggleBrush = function () {
+            toggle = !toggle;
 
-        function brushstart() {
-            // Brush start here
+            if (!toggle) {
+                document.getElementById('disable-btn').innerHTML = '<i class="fa fa-toggle-off"></i> Brushes Off';
 
-        };
-
-
-        function brushed() {
-            var brushContext = gBrushesContext.select("#" + this.id)
-            brushContext.selectAll('.overlay').attr("height", height2)
-            brushContext.selectAll('.selection').attr("height", height2)
-
-            if (!d3.event.sourceEvent) return;
-            if (!d3.event.sourceEvent.srcElement) return;
-            //console.log(d3.event.sourceEvent.srcElement.parentNode)
-            //console.log((this))
-            //console.log(d3.event.sourceEvent)
-            //console.log(d3.event)
-            //console.log(d3.event.sourceEvent.srcElement.parentNode)
-            let selection = d3.event.selection.map(xScale.invert);
-
-            mySelections[this.id] = {start: selection[0], end: selection[1]};
-
-
-            //console.log("Selections are: ", mySelections);
-
-
-        }
-
-        function brushend() {
-            //console.log("brushend")
-            var brushContext = gBrushesContext.select("#" + this.id)
-            brushContext.selectAll('.overlay').attr("height", height2)
-            brushContext.selectAll('.selection').attr("height", height2)
-            // Figure out if our latest brush has a selection
-            var lastBrushID = brushes[brushes.length - 1].id;
-            var lastBrush = document.getElementById('brush-' + lastBrushID);
-            var selection = d3.brushSelection(lastBrush);
-
-            if (!d3.event.sourceEvent) return; // Only transition after input.
-            if (!d3.event.sourceEvent.srcElement) return;
-
-            if (!d3.event.selection) return; // Ignore empty selections.
-            var d0 = d3.event.selection.map(xScale.invert),
-                d1 = d0.map(d3.timeSecond);
-
-            // If empty when rounded, use floor & ceil instead.
-            if (d1[0] >= d1[1]) {
-                d1[0] = d3.timeSecond.floor(d0[0]);
-                d1[1] = d3.timeSecond.offset(d1[0]);
-            }
-
-            d3.select(this).transition().call(d3.event.target.move, d1.map(xScale));
-            brushContext.transition().call(d3.event.target.move, d1.map(xScale2));
-            brushContext.on('.brush', null);
-
-            console.log("durch brushend")
-            // If it does, that means we need another one
-            if (brushes.length < brushCount && selection && selection[0] !== selection[1]) {
-
-                newBrush()
-
-
-            }
-
-            // Always draw brushes
-            drawBrushes();
-        }
-    }
-
-    function drawBrushes() {
-        //console.log("draw", initialBrushesDrawn)
-        var brushSelection = gBrushes
-            .selectAll('.brush')
-            .data(brushes, function (d) {
-                return d.id
-            });
-
-        //console.log("Brush selection:", brushSelection);
-
-        // Set up new brushes
-        brushSelection.enter()
-            .insert("g", '.brush')
-            .attr('class', 'brush')
-            .attr('id', function (brush) {
-                return "brush-" + brush.id;
-            })
-            .each(function (brushObject) {
-                // call the brush
-                brushObject.brush(d3.select(this));
-                //console.log(brushObject)
-
-
-                if (!initialBrushesDrawn) {
-                    console.log("sin am if")
-                    d3.select(this)
-                        .attr('class', 'brush')
-                        .selectAll('.overlay')
-                        .style('pointer-events', function () {
-                            var brush = brushObject.brush;
-                            if (brushObject.id === brushes.length - 1 && brush !== undefined) {
-                                return 'all';
-                            } else {
-                                return 'none';
-                            }
-                        })
-
-
-                    // set some default values of the brushes
-                    d3.select(this).selectAll('.selection')
-                        .style('fill', function (d) {
-                            return colorScale(brushObject.id)
-                        })
-                    brushObject.brush.move(d3.select(this), [
-
-                        xScale(brushObject.start * 1000),
-                        xScale(brushObject.endpoint * 1000),
-                    ])
-
+                for (let i = 0, len = brushes.length; i < len; i++) {
+                    d3.select('#brush-' + i).on('.brush', null);
                 }
 
-            });
+                d3.select('.brushes').selectAll('.selection').style("cursor", "initial");
+                d3.select('.brushes').selectAll('.overlay').style("cursor", "initial");
+                rect.on(".zoom", null)
 
 
-        brushSelection
-            .each(function (brushObject) {
+            } else {
+                document.getElementById('disable-btn').innerHTML = '<i class="fa fa-toggle-on"></i> Brushes On';
 
+                for (let i = 0, len = brushes.length; i < len; i++) {
+                    brushes[i].brush(d3.select('#brush-' + i));
+                }
+
+                rect.call(zoom)
+                startTransition();
+
+                d3.select('.brushes').selectAll('.selection').style("cursor", "move");
+                d3.select('.brushes').selectAll('.overlay').style("cursor", "crosshair");
+
+
+            }
+        };*/
+    newBrush()
+    drawBrushes()
+}
+
+function hmsToSecondsOnly(str) {
+    var p = str.split(':'),
+        s = 0, m = 1;
+
+    while (p.length > 0) {
+        s += m * parseInt(p.pop(), 10);
+        m *= 60;
+    }
+
+    return s;
+}
+
+function newBrush() {
+    //console.log('newBrush')
+    var brush = d3.brushX()
+        .extent([[0, 0], [width, height]])
+
+        .on("start", brushstart)
+        .on("brush", brushed)
+        .on("end", brushend);
+
+    brushes.push({id: brushes.length, brush: brush});
+
+    function brushstart() {
+        // Brush start here
+
+    };
+
+
+    function brushed() {
+        var brushContext = gBrushesContext.select("#" + this.id)
+        brushContext.selectAll('.overlay').attr("height", height2)
+        brushContext.selectAll('.selection').attr("height", height2)
+        var brushFocus = gBrushes.select("#" + this.id)
+
+        brushFocus.selectAll('.overlay').attr("height", heighttl)
+        brushFocus.selectAll('.selection').attr("height", heighttl)
+
+        if (!d3.event.sourceEvent) return;
+        if (!d3.event.sourceEvent.srcElement) return;
+        //console.log(d3.event.sourceEvent.srcElement.parentNode)
+        //console.log((this))
+        //console.log(d3.event.sourceEvent)
+        //console.log(d3.event)
+        //console.log(d3.event.sourceEvent.srcElement.parentNode)
+        let selection = d3.event.selection.map(xScale.invert);
+
+        mySelections[this.id] = {start: selection[0], end: selection[1]};
+
+
+        //console.log("Selections are: ", mySelections);
+
+
+    }
+
+    function brushend() {
+        //console.log("brushend")
+        var brushContext = gBrushesContext.select("#" + this.id)
+        brushContext.selectAll('.overlay').attr("height", height2)
+        brushContext.selectAll('.selection').attr("height", height2)
+        // Figure out if our latest brush has a selection
+        var brushFocus = gBrushes.select("#" + this.id)
+
+        brushFocus.selectAll('.overlay').attr("height", heighttl)
+        brushFocus.selectAll('.selection').attr("height", heighttl)
+        var lastBrushID = brushes[brushes.length - 1].id;
+        var lastBrush = document.getElementById('brush-' + lastBrushID);
+        var selection = d3.brushSelection(lastBrush);
+
+        if (!d3.event.sourceEvent) return; // Only transition after input.
+        if (!d3.event.sourceEvent.srcElement) return;
+
+        if (!d3.event.selection) return; // Ignore empty selections.
+        var d0 = d3.event.selection.map(xScale.invert),
+            d1 = d0.map(d3.timeSecond);
+
+        // If empty when rounded, use floor & ceil instead.
+        if (d1[0] >= d1[1]) {
+            d1[0] = d3.timeSecond.floor(d0[0]);
+            d1[1] = d3.timeSecond.offset(d1[0]);
+        }
+
+        d3.select(this).transition().call(d3.event.target.move, d1.map(xScale));
+        brushContext.transition().call(d3.event.target.move, d1.map(xScale2));
+        brushContext.on('.brush', null);
+
+        console.log("durch brushend")
+        // If it does, that means we need another one
+        if (brushes.length < brushCount && selection && selection[0] !== selection[1]) {
+
+            newBrush()
+
+
+        }
+
+        // Always draw brushes
+        drawBrushes();
+    }
+}
+
+function drawBrushes() {
+    //console.log("draw", initialBrushesDrawn)
+    var brushSelection = gBrushes
+        .selectAll('.brush')
+        .data(brushes, function (d) {
+            return d.id
+        });
+
+    console.log("Brush selection:", brushSelection);
+
+    // Set up new brushes
+    brushSelection.enter()
+        .insert("g", '.brush')
+        .attr('class', 'brush')
+        .attr('id', function (brush) {
+            return "brush-" + brush.id;
+        })
+        .each(function (brushObject) {
+            // call the brush
+            brushObject.brush(d3.select(this));
+            //console.log(brushObject)
+
+
+            if (!initialBrushesDrawn) {
+                //console.log("sin am if")
                 d3.select(this)
                     .attr('class', 'brush')
                     .selectAll('.overlay')
                     .style('pointer-events', function () {
                         var brush = brushObject.brush;
-                        if (brushObject.id === brushes.length - 1 && brush !== undefined) {
+                        /*if (brushObject.id === brushes.length - 1 && brush !== undefined) {
+                            console.log("all")
                             return 'all';
                         } else {
+                            console.log("none")
                             return 'none';
-                        }
+                        }*/
+                        return "none"
                     })
 
 
+                // set some default values of the brushes
                 d3.select(this).selectAll('.selection')
                     .style('fill', function (d) {
-                        return colorScale(brushObject.id)
+                        if (brushObject.hasOwnProperty("nodeID")) {
+                            let circle = d3.select("circle[id='c_" + brushObject.nodeID + "']")
+
+
+                            var color = circle.attr("fill_value")
+
+
+                            return color
+                        }
+
                     })
-            })
+                brushObject.brush.move(d3.select(this), [
 
-        brushSelection.exit()
-            .remove();
+                    xScale(brushObject.start * 1000),
+                    xScale(brushObject.endpoint * 1000),
+                ])
 
-        initialBrushesDrawn = true
-        drawBrushes2()
-    }
+            }
 
-    function drawBrushes2() {
-        //console.log("draw", initialBrushesDrawn2)
-        var brushSelection2 = gBrushesContext
-            .selectAll('.brush')
-            .data(brushes, function (d) {
-                return d.id
-            });
+        });
 
 
-        // Set up new brushes
-        brushSelection2.enter()
-            .insert("g", '.brush')
-            .attr('class', 'brush')
-            .attr('id', function (brush) {
-                return "brush-" + brush.id;
-            })
-            .each(function (brushObject) {
-                // call the brush
-                brushObject.brush(d3.select(this));
-                //console.log(brushObject)
+    brushSelection
+        .each(function (brushObject) {
+
+            d3.select(this)
+                .attr('class', 'brush')
+                .selectAll('.overlay')
+                .style('pointer-events', function () {
+                    var brush = brushObject.brush;
+                    if (focusNode){
+                          if (brushObject.id === brushes.length - 1 && brush !== undefined) {
+                        console.log("all")
+
+                        return 'all';
+                    } else {
+                        console.log("none")
+
+                        return 'none';
+                    }
+                    }else{
+                        return 'none'
+                    }
+
+                })
 
 
-                if (!initialBrushesDrawn2) {
-                    console.log("sin am if")
-                    d3.select(this)
-                        .attr('class', 'brush')
-                        .selectAll('.overlay')
-                        .style('pointer-events', function () {
-                            var brush = brushObject.brush;
-                            if (brushObject.id === brushes.length - 1 && brush !== undefined) {
-                                return 'all';
-                            } else {
-                                return 'none';
-                            }
-                        })
+            d3.select(this).selectAll('.selection')
+                .style('fill', function (d) {
+                    if (brushObject.hasOwnProperty("nodeID")) {
+                        let circle = d3.select("circle[id='c_" + brushObject.nodeID + "']")
+                        console.log(circle)
 
 
-                    // set some default values of the brushes
-
-                    brushObject.brush.move(d3.select(this), [
-
-                        xScale2(brushObject.start * 1000),
-                        xScale2(brushObject.endpoint * 1000),
-                    ])
-                    d3.select(this).selectAll('.selection')
-                        .style('fill', function (d) {
-                            return colorScale(brushObject.id)
-                        })
-                    d3.select(this).selectAll('.overlay').attr("height", height2)
-                    d3.select(this).selectAll('.selection').attr("height", height2)
-
-                }
-
-            });
+                        var color = circle.attr("fill_value")
 
 
-        brushSelection2
-            .each(function (brushObject) {
-                //console.log(brushObject)
-                //console.log(d3.select(this).selectAll('.selection'))
+                        return color
+                    }
+                })
+        })
+
+    brushSelection.exit()
+        .remove();
+
+    initialBrushesDrawn = true
+    drawBrushes2()
+}
+
+function drawBrushes2() {
+    //console.log("draw", initialBrushesDrawn2)
+    var brushSelection2 = gBrushesContext
+        .selectAll('.brush')
+        .data(brushes, function (d) {
+            return d.id
+        });
+
+
+    // Set up new brushes
+    brushSelection2.enter()
+        .insert("g", '.brush')
+        .attr('class', 'brush')
+        .attr('id', function (brush) {
+            return "brush-" + brush.id;
+        })
+        .each(function (brushObject) {
+            // call the brush
+            brushObject.brush(d3.select(this));
+            //console.log(brushObject)
+
+
+            if (!initialBrushesDrawn2) {
+                //console.log("sin am if")
                 d3.select(this)
                     .attr('class', 'brush')
                     .selectAll('.overlay')
-                    .attr("height", height2)
-
                     .style('pointer-events', function () {
                         var brush = brushObject.brush;
                         if (brushObject.id === brushes.length - 1 && brush !== undefined) {
@@ -504,6 +553,14 @@ function drawTimeline() {
                         }
                     })
 
+
+                // set some default values of the brushes
+
+                brushObject.brush.move(d3.select(this), [
+
+                    xScale2(brushObject.start * 1000),
+                    xScale2(brushObject.endpoint * 1000),
+                ])
                 d3.select(this).selectAll('.selection')
                     .style('fill', function (d) {
                         return colorScale(brushObject.id)
@@ -511,203 +568,205 @@ function drawTimeline() {
                 d3.select(this).selectAll('.overlay').attr("height", height2)
                 d3.select(this).selectAll('.selection').attr("height", height2)
 
+            }
 
-            })
+        });
 
-        brushSelection2.exit()
-            .remove();
 
-        initialBrushesDrawn2 = true
+    brushSelection2
+        .each(function (brushObject) {
+            //console.log(brushObject)
+            //console.log(d3.select(this).selectAll('.selection'))
+            d3.select(this)
+                .attr('class', 'brush')
+                .selectAll('.overlay')
+                .attr("height", height2)
+
+                .style('pointer-events', function () {
+                    var brush = brushObject.brush;
+                    if (brushObject.id === brushes.length - 1 && brush !== undefined) {
+                        console.log("all")
+                        return 'all';
+                    } else {
+                        console.log("Nonce")
+                        return 'none';
+                    }
+                })
+
+            d3.select(this).selectAll('.selection')
+                .style('fill', function (d) {
+                    return colorScale(brushObject.id)
+                })
+            d3.select(this).selectAll('.overlay').attr("height", height2)
+            d3.select(this).selectAll('.selection').attr("height", height2)
+
+
+        })
+
+    brushSelection2.exit()
+        .remove();
+
+    initialBrushesDrawn2 = true
+
+}
+
+//makeBrush(0, 10);
+//makeBrush(60, 117);
+
+
+function makeBrush(time, d) {
+    const brush = d3
+        .brushX()
+        .extent([[0, 0], [width, height]])
+        .on("start", brushstart)
+        .on("brush", brushed)
+        .on('end', brushend);
+
+    var start = time[0]
+    var end = time[1]
+
+
+    var startDate = new Date(start * 1000)
+    var endDate = new Date(end * 1000)
+    //console.log(startDate, endDate)
+
+    var brushID = brushes.length
+    //console.log(brushes.length)
+
+    mySelections["brush-" + brushID] = {start: startDate, end: endDate, nodeID: d.id, uri: d.uri};
+    brushes.push({id: brushes.length, brush, start: start, endpoint: end, nodeID: d.id, uri: d.uri});
+
+    function brushstart() {
+        // Brush start here
+
+    };
+
+
+    function brushed() {
+        var brushContext = gBrushesContext.select("#" + this.id)
+
+        brushContext.selectAll('.overlay').attr("height", height2)
+        brushContext.selectAll('.selection').attr("height", height2)
+        var brushFocus = gBrushes.select("#" + this.id)
+
+        brushFocus.selectAll('.overlay').attr("height", heighttl)
+        brushFocus.selectAll('.selection').attr("height", heighttl)
+        if (!d3.event.sourceEvent) return;
+        if (!d3.event.sourceEvent.srcElement) return;
+        //console.log(d3.event.sourceEvent.srcElement.parentNode)
+        let selection = d3.event.selection.map(xScale.invert);
+
+        mySelections[this.id] = {start: selection[0], end: selection[1]};
+
+        //console.log("Selections are: ", mySelections);
+
 
     }
 
-    makeBrush(0, 10);
-    makeBrush(60, 117);
+    function brushend() {
+        //console.log("brushedend")
 
-    newBrush()
-    drawBrushes()
+        var brushContext = gBrushesContext.select("#" + this.id)
 
+        brushContext.selectAll('.overlay').attr("height", height2)
+        brushContext.selectAll('.selection').attr("height", height2)
+        var brushFocus = gBrushes.select("#" + this.id)
 
-    function makeBrush(start, end) {
-        const brush = d3
-            .brushX()
-            .extent([[0, 0], [width, height]])
-            .on("start", brushstart)
-            .on("brush", brushed)
-            .on('end', brushend);
+        brushFocus.selectAll('.overlay').attr("height", heighttl)
+        brushFocus.selectAll('.selection').attr("height", heighttl)
+        //console.log("brushend")
+        // Figure out if our latest brush has a selection
+        var lastBrushID = brushes[brushes.length - 1].id;
+        var lastBrush = document.getElementById('brush-' + lastBrushID);
+        var selection = d3.brushSelection(lastBrush);
 
-        var startDate = new Date(start * 1000)
-        var endDate = new Date(end * 1000)
-        console.log(startDate, endDate)
+        if (!d3.event.sourceEvent) return; // Only transition after input.
+        if (!d3.event.sourceEvent.srcElement) return;
 
-        var brushID = brushes.length
-        console.log(brushes.length)
+        if (!d3.event.selection) return; // Ignore empty selections.
+        var d0 = d3.event.selection.map(xScale.invert),
+            d1 = d0.map(d3.timeSecond);
 
-        mySelections["brush-" + brushID] = {start: startDate, end: endDate};
-        brushes.push({id: brushes.length, brush, start: start, endpoint: end});
-
-        function brushstart() {
-            // Brush start here
-
-        };
-
-
-        function brushed() {
-
-            var brushContext = gBrushesContext.select("#" + this.id)
-
-            brushContext.selectAll('.overlay').attr("height", height2)
-            brushContext.selectAll('.selection').attr("height", height2)
-            if (!d3.event.sourceEvent) return;
-            if (!d3.event.sourceEvent.srcElement) return;
-            //console.log(d3.event.sourceEvent.srcElement.parentNode)
-            let selection = d3.event.selection.map(xScale.invert);
-
-            mySelections[this.id] = {start: selection[0], end: selection[1]};
-
-            //console.log("Selections are: ", mySelections);
-
-
+        // If empty when rounded, use floor & ceil instead.
+        if (d1[0] >= d1[1]) {
+            d1[0] = d3.timeSecond.floor(d0[0]);
+            d1[1] = d3.timeSecond.offset(d1[0]);
         }
+        d3.select(this).transition().call(d3.event.target.move, d1.map(xScale));
 
-        function brushend() {
-            var brushContext = gBrushesContext.select("#" + this.id)
+        //console.log(this.id)
+        //console.log(gBrushesContext.select("#"+this.id))
 
-            brushContext.selectAll('.overlay').attr("height", height2)
-            brushContext.selectAll('.selection').attr("height", height2)
-            //console.log("brushend")
-            // Figure out if our latest brush has a selection
-            var lastBrushID = brushes[brushes.length - 1].id;
-            var lastBrush = document.getElementById('brush-' + lastBrushID);
-            var selection = d3.brushSelection(lastBrush);
+        brushContext.on('.brush', null);
 
-            if (!d3.event.sourceEvent) return; // Only transition after input.
-            if (!d3.event.sourceEvent.srcElement) return;
-
-            if (!d3.event.selection) return; // Ignore empty selections.
-            var d0 = d3.event.selection.map(xScale.invert),
-                d1 = d0.map(d3.timeSecond);
-
-            // If empty when rounded, use floor & ceil instead.
-            if (d1[0] >= d1[1]) {
-                d1[0] = d3.timeSecond.floor(d0[0]);
-                d1[1] = d3.timeSecond.offset(d1[0]);
-            }
-            d3.select(this).transition().call(d3.event.target.move, d1.map(xScale));
-
-            //console.log(this.id)
-            //console.log(gBrushesContext.select("#"+this.id))
-
-            brushContext.on('.brush', null);
-
-            brushContext.transition().call(d3.event.target.move, d1.map(xScale2));
+        brushContext.transition().call(d3.event.target.move, d1.map(xScale2));
 
 
-        }
-
-        //makeBrush2(start,end)
     }
 
-    function makeBrush2(start, end) {
-        const brush = d3
-            .brushX()
-            .extent([[0, 0], [width, height2]])
-            .on("start", brushstart2)
-            .on("brush", brushed2)
-            .on('end', brushend2);
+    //makeBrush2(start,end)
+}
 
-        var startDate = new Date(start * 1000)
-        var endDate = new Date(end * 1000)
-        console.log(startDate, endDate)
+function makeBrush2(start, end) {
+    const brush = d3
+        .brushX()
+        .extent([[0, 0], [width, height2]])
+        .on("start", brushstart2)
+        .on("brush", brushed2)
+        .on('end', brushend2);
 
-        var brushID = brushes.length
-        console.log(brushes.length)
+    var startDate = new Date(start * 1000)
+    var endDate = new Date(end * 1000)
+    console.log(startDate, endDate)
 
-        //mySelections["brush-" + brushID] = {start: startDate, end: endDate};
-        //brushes.push({id: brushes.length, brush, start: start, endpoint: end});
+    var brushID = brushes.length
+    console.log(brushes.length)
 
-        function brushstart2() {
-            // Brush start here
+    //mySelections["brush-" + brushID] = {start: startDate, end: endDate};
+    //brushes.push({id: brushes.length, brush, start: start, endpoint: end});
 
-        };
+    function brushstart2() {
+        // Brush start here
 
-
-        function brushed2() {
-
-
-            if (!d3.event.sourceEvent) return;
-            if (!d3.event.sourceEvent.srcElement) return;
-            //console.log(d3.event.sourceEvent.srcElement.parentNode)
-            console.log((this))
-            let selection = d3.event.selection.map(xScale.invert);
-
-            mySelections[this.id] = {start: selection[0], end: selection[1]};
-
-            //console.log("Selections are: ", mySelections);
+    };
 
 
-        }
-
-        function brushend2() {
-            //console.log("brushend")
-            // Figure out if our latest brush has a selection
-            var lastBrushID = brushes[brushes.length - 1].id;
-            var lastBrush = document.getElementById('brush-' + lastBrushID);
-            var selection = d3.brushSelection(lastBrush);
-
-            if (!d3.event.sourceEvent) return; // Only transition after input.
-            if (!d3.event.selection) return; // Ignore empty selections.
-            var d0 = d3.event.selection.map(xScale.invert),
-                d1 = d0.map(d3.timeSecond);
-
-            // If empty when rounded, use floor & ceil instead.
-            if (d1[0] >= d1[1]) {
-                d1[0] = d3.timeSecond.floor(d0[0]);
-                d1[1] = d3.timeSecond.offset(d1[0]);
-            }
-
-            d3.select(this).transition().call(d3.event.target.move, d1.map(xScale2));
+    function brushed2() {
 
 
-        }
+        if (!d3.event.sourceEvent) return;
+        if (!d3.event.sourceEvent.srcElement) return;
+        //console.log(d3.event.sourceEvent.srcElement.parentNode)
+        console.log((this))
+        let selection = d3.event.selection.map(xScale.invert);
+
+        mySelections[this.id] = {start: selection[0], end: selection[1]};
+
+        //console.log("Selections are: ", mySelections);
+
+
     }
 
-/*
-    let toggle = true;
+    function brushend2() {
+        //console.log("brushend")
+        // Figure out if our latest brush has a selection
+        var lastBrushID = brushes[brushes.length - 1].id;
+        var lastBrush = document.getElementById('brush-' + lastBrushID);
+        var selection = d3.brushSelection(lastBrush);
 
-    document.getElementById('disable-btn').addEventListener('click', () => {
-        toggleBrush();
-    });
+        if (!d3.event.sourceEvent) return; // Only transition after input.
+        if (!d3.event.selection) return; // Ignore empty selections.
+        var d0 = d3.event.selection.map(xScale.invert),
+            d1 = d0.map(d3.timeSecond);
 
-    var toggleBrush = function () {
-        toggle = !toggle;
-
-        if (!toggle) {
-            document.getElementById('disable-btn').innerHTML = '<i class="fa fa-toggle-off"></i> Brushes Off';
-
-            for (let i = 0, len = brushes.length; i < len; i++) {
-                d3.select('#brush-' + i).on('.brush', null);
-            }
-
-            d3.select('.brushes').selectAll('.selection').style("cursor", "initial");
-            d3.select('.brushes').selectAll('.overlay').style("cursor", "initial");
-            rect.on(".zoom", null)
-
-
-        } else {
-            document.getElementById('disable-btn').innerHTML = '<i class="fa fa-toggle-on"></i> Brushes On';
-
-            for (let i = 0, len = brushes.length; i < len; i++) {
-                brushes[i].brush(d3.select('#brush-' + i));
-            }
-
-            rect.call(zoom)
-            startTransition();
-
-            d3.select('.brushes').selectAll('.selection').style("cursor", "move");
-            d3.select('.brushes').selectAll('.overlay').style("cursor", "crosshair");
-
-
+        // If empty when rounded, use floor & ceil instead.
+        if (d1[0] >= d1[1]) {
+            d1[0] = d3.timeSecond.floor(d0[0]);
+            d1[1] = d3.timeSecond.offset(d1[0]);
         }
-    };*/
+
+        d3.select(this).transition().call(d3.event.target.move, d1.map(xScale2));
+
+
+    }
 }
